@@ -106,7 +106,7 @@
     <string name="quick_fast_cores">Núcleos rápidos</string>
     <string name="quick_fast_cores_tip">Mantiene el juego en los núcleos más potentes del procesador. Desactívalo solo si la consola se calienta demasiado.</string>
     <string name="quick_filter">Filtro</string>
-    <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles tal cual. FSR reescala como los juegos modernos: bordes limpios y sin cuadros. Anime4K redibuja la imagen con una red neuronal antes de FSR: M es el equilibrado, 3D el más ligero y GAN el más intenso. xBR redondea los bordes y HD deshace el tramado. Los efectos solo se pueden usar con Nítido, Suave y Nítido suavizado.</string>
+    <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles tal cual. FSR reescala como los juegos modernos: bordes limpios y sin cuadros. Anime4K redibuja la imagen con una red neuronal antes de FSR: Light es la versión ligera y Full la completa, más definida y más pesada. xBR redondea los bordes y HD deshace el tramado. Los efectos solo se pueden usar con Nítido, Suave y Nítido suavizado.</string>
     <string-array name="quick_filters">
         <item>Nítido</item>
         <item>Suave</item>
@@ -114,9 +114,8 @@
         <item>HD (reconstruir)</item>
         <item>xBR (bordes suaves)</item>
         <item>FSR (AMD)</item>
-        <item>Anime4K M</item>
-        <item>Anime4K 3D</item>
-        <item>Anime4K GAN</item>
+        <item>Anime4K Light</item>
+        <item>Anime4K Full</item>
     </string-array>
     <string name="quick_hd_level">Nivel HD</string>
     <string name="quick_hd_level_tip">Bajo: solo deshace el tramado. Medio y alto redondean además las diagonales y los degradados.</string>

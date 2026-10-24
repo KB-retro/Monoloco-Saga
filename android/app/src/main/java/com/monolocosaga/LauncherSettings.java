@@ -24,17 +24,27 @@ final class LauncherSettings {
     @SuppressWarnings("deprecation")
     static SharedPreferences prefs(Context context) {
         SharedPreferences prefs = context.getSharedPreferences("game", Context.MODE_MULTI_PROCESS);
-        if (prefs.getInt(VERSION, 1) < 2) migrate(prefs);
+        if (prefs.getInt(VERSION, 1) < 3) migrate(prefs);
         return prefs;
     }
 
-    /** Version 2 dropped the CRT Lottes filter (5) and made CRT Hyllian (6) an effect. */
+    /**
+     * Version 2 dropped the CRT Lottes filter (5) and made CRT Hyllian (6) an effect. Version 3
+     * dropped Anime4K GAN (8) and swapped Anime4K M (6, now Full) and 3D (7, now Light).
+     */
     private static void migrate(SharedPreferences prefs) {
-        SharedPreferences.Editor editor = prefs.edit().putInt(VERSION, 2);
+        int version = prefs.getInt(VERSION, 1);
         int filter = prefs.getInt(FILTER, DEFAULT_FILTER);
-        if (filter == 5) editor.putInt(FILTER, DEFAULT_FILTER);
-        if (filter == 6) editor.putInt(FILTER, DEFAULT_FILTER).putInt(EFFECT, EFFECT_CRT_HYLLIAN);
-        if (filter > 6) editor.putInt(FILTER, filter - 2);
+        SharedPreferences.Editor editor = prefs.edit().putInt(VERSION, 3);
+        if (version < 2) {
+            if (filter == 5 || filter == 6) filter = DEFAULT_FILTER;
+            if (prefs.getInt(FILTER, DEFAULT_FILTER) == 6) editor.putInt(EFFECT, EFFECT_CRT_HYLLIAN);
+            if (filter > 6) filter -= 2;
+        }
+        if (filter == 6) filter = 7;
+        else if (filter == 7) filter = 6;
+        else if (filter == 8) filter = 7;
+        if (prefs.contains(FILTER)) editor.putInt(FILTER, filter);
         editor.apply();
     }
 

@@ -15,7 +15,7 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "Monoloco", __VA_ARGS__)
 #define COUNT(a) ((int)(sizeof(a) / sizeof((a)[0])))
 
-enum { kMaxBinds = 8, kMaxPasses = 24, kMaxRuns = 2, kNetworks = 3 };
+enum { kMaxBinds = 8, kMaxPasses = 16, kMaxRuns = 2, kNetworks = 2 };
 
 typedef struct {
   GLuint texture;
@@ -27,14 +27,13 @@ typedef struct {
   GLint output, sharpness, raw[kMaxBinds], size[kMaxBinds];
 } Pass;
 
-// Each network doubles the picture; the lighter ones run twice (x4).
+// Each network doubles the picture and runs twice (x4), in kUpscale order.
 static const struct {
   const HookPass *passes;
   int count, runs;
 } kNetworkTable[kNetworks] = {
-    {kAnime4kMPasses, COUNT(kAnime4kMPasses), 2},
-    {kAnime4k3dPasses, COUNT(kAnime4k3dPasses), 2},
-    {kAnime4kGanPasses, COUNT(kAnime4kGanPasses), 1},
+    {kAnime4kLightPasses, COUNT(kAnime4kLightPasses), 2},
+    {kAnime4kFullPasses, COUNT(kAnime4kFullPasses), 2},
 };
 
 static GLuint s_full_vao, s_full_vbo, s_framebuffer;
@@ -410,7 +409,7 @@ bool UpscaleDraw(int method, GLuint frame, int frame_width, int frame_height,
                  int picture_width, int picture_height, GLuint picture_vao,
                  int drawable_width, int drawable_height) {
   if (!s_ready || picture_width <= 0 || picture_height <= 0) return false;
-  int network = method - kUpscaleAnime4kM;
+  int network = method - kUpscaleAnime4kLight;
   if (network >= 0 && !NetworkReady(network)) network = -1;  // FSR alone
 
   const Target frame_target = {frame, frame_width, frame_height};

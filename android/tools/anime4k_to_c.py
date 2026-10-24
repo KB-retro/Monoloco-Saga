@@ -13,9 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "native" / "third_party" / "anime4k"
 OUTPUT = ROOT / "native" / "frontend" / "anime4k_shaders.h"
 SHADERS = [  # C name, file
-    ("kAnime4kM", "Anime4K_Upscale_CNN_x2_M.glsl"),
-    ("kAnime4k3d", "Anime4K_3DGraphics_Upscale_x2_US.glsl"),
-    ("kAnime4kGan", "Anime4K_Upscale_GAN_x2_S.glsl"),
+    ("kAnime4kLight", "Anime4K_3DGraphics_Upscale_x2_US.glsl"),
+    ("kAnime4kFull", "Anime4K_Upscale_CNN_x2_M.glsl"),
 ]
 MAX_BINDS = 8
 

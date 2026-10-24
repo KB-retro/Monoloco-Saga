@@ -7,10 +7,9 @@
 
 enum {
   kUpscaleFsr = 0,
-  kUpscaleAnime4kM = 1,
-  kUpscaleAnime4k3d = 2,
-  kUpscaleAnime4kGan = 3,
-  kUpscaleCount = 4,
+  kUpscaleAnime4kLight = 1,  // Anime4K's 3D graphics network
+  kUpscaleAnime4kFull = 2,   // Anime4K's CNN M
+  kUpscaleCount = 3,
 };
 
 // One pass of an mpv user shader (anime4k_shaders.h): it reads `binds`, writes
