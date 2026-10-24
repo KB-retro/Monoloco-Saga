@@ -13,7 +13,11 @@ enum {
   kFilterXbr = 4,          // Hyllian's xBR: smooth diagonals, sharp edges
   kFilterCrtLottes = 5,
   kFilterCrtHyllian = 6,
-  kFilterCount = 7,
+  kFilterFsr = 7,          // AMD FSR 1, then the Anime4K networks followed by FSR
+  kFilterAnime4kM = 8,
+  kFilterAnime4k3d = 9,
+  kFilterAnime4kGan = 10,
+  kFilterCount = 11,
 };
 
 enum {

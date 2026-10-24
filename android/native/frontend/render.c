@@ -14,6 +14,7 @@
 // and translated to GLSL ES 3 when the renderer starts (ReconstructSource).
 #include "desktop_reconstruct_shader.h"
 #include "shaders.h"
+#include "upscale.h"
 
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "Monoloco", __VA_ARGS__)
 
@@ -26,7 +27,7 @@ typedef struct {
   GLuint program;
   GLint texture, source, output;
 } ExtraFilter;
-static ExtraFilter s_extra[kFilterCount - kFilterXbr];
+static ExtraFilter s_extra[kFilterCrtHyllian - kFilterXbr + 1];
 static int s_tex_width, s_tex_height;
 static int s_frame_width = 256, s_frame_height = 224;
 static bool s_have_frame;
@@ -180,7 +181,7 @@ bool RenderInit(void) {
   }
   // Optional too: a filter that does not build falls back to sharp bilinear.
   const char *const extra[] = {kXbrFragment, kCrtLottesFragment, kCrtHyllianFragment};
-  for (int i = 0; i < kFilterCount - kFilterXbr; i++) {
+  for (int i = 0; i <= kFilterCrtHyllian - kFilterXbr; i++) {
     ExtraFilter *filter = &s_extra[i];
     filter->program = Link(kVertex, extra[i]);
     if (!filter->program) continue;
@@ -188,6 +189,7 @@ bool RenderInit(void) {
     filter->source = glGetUniformLocation(filter->program, "uSource");
     filter->output = glGetUniformLocation(filter->program, "uOutput");
   }
+  UpscaleInit();
   s_u_texture = glGetUniformLocation(s_program, "uTexture");
   s_u_source = glGetUniformLocation(s_program, "uSource");
   s_u_output = glGetUniformLocation(s_program, "uOutput");
@@ -218,7 +220,8 @@ void RenderShutdown(void) {
   if (s_vao) glDeleteVertexArrays(1, &s_vao);
   if (s_program) glDeleteProgram(s_program);
   if (s_hd_program) glDeleteProgram(s_hd_program);
-  for (int i = 0; i < kFilterCount - kFilterXbr; i++) {
+  UpscaleShutdown();
+  for (int i = 0; i <= kFilterCrtHyllian - kFilterXbr; i++) {
     if (s_extra[i].program) glDeleteProgram(s_extra[i].program);
     s_extra[i].program = 0;
   }
@@ -297,7 +300,11 @@ void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
     glBindVertexArray(0);
     return;
   }
-  if (filter >= kFilterXbr && s_extra[filter - kFilterXbr].program) {
+  if (filter >= kFilterFsr &&
+      UpscaleDraw(filter - kFilterFsr, s_texture, s_frame_width, s_frame_height,
+                  (int)lroundf(width), (int)lroundf(height), s_vao, drawable_width, drawable_height))
+    return;
+  if (filter >= kFilterXbr && filter <= kFilterCrtHyllian && s_extra[filter - kFilterXbr].program) {
     // These pick their own texels, and the CRT ones replace the effects.
     const ExtraFilter *extra = &s_extra[filter - kFilterXbr];
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

@@ -39,7 +39,7 @@
     <string name="settings_delete_cores_confirm">Delete the imported cores? The APK\'s own are kept.</string>
     <string name="settings_cores_deleted">Deleted: %d.</string>
     <string name="settings_back">Back</string>
-    <string name="port_credits_body">Monoloco Saga by &lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt; (Patrulla Retro) · &lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;version %1$s&lt;/a&gt;&lt;br&gt;&lt;br&gt;Android port based on the static recompilations by elliotttate and contributors: &lt;a href="https://github.com/elliotttate/DKC1Recomp"&gt;DKC1Recomp&lt;/a&gt;, &lt;a href="https://github.com/elliotttate/DKC2Recomp"&gt;DKC2Recomp&lt;/a&gt; and &lt;a href="https://github.com/elliotttate/DKC3Recomp"&gt;DKC3Recomp&lt;/a&gt; (MIT license), on &lt;a href="https://github.com/elliotttate/snesrecomp"&gt;snesrecomp&lt;/a&gt; (PolyForm Noncommercial 1.0.0), &lt;a href="https://github.com/libsdl-org/SDL"&gt;SDL2&lt;/a&gt; (zlib) and &lt;a href="https://github.com/libretro/glsl-shaders"&gt;libretro\'s&lt;/a&gt; shaders: Hyllian\'s xBR and CRT (MIT) and Timothy Lottes\' CRT (public domain).&lt;br&gt;&lt;br&gt;Unofficial free project, not affiliated with the owners of the games. No game data included: you need your own copies. Not for sale.</string>
+    <string name="port_credits_body">Monoloco Saga by &lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt; (Patrulla Retro) · &lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;version %1$s&lt;/a&gt;&lt;br&gt;&lt;br&gt;Android port based on the static recompilations by elliotttate and contributors: &lt;a href="https://github.com/elliotttate/DKC1Recomp"&gt;DKC1Recomp&lt;/a&gt;, &lt;a href="https://github.com/elliotttate/DKC2Recomp"&gt;DKC2Recomp&lt;/a&gt; and &lt;a href="https://github.com/elliotttate/DKC3Recomp"&gt;DKC3Recomp&lt;/a&gt; (MIT license), on &lt;a href="https://github.com/elliotttate/snesrecomp"&gt;snesrecomp&lt;/a&gt; (PolyForm Noncommercial 1.0.0), &lt;a href="https://github.com/libsdl-org/SDL"&gt;SDL2&lt;/a&gt; (zlib) and &lt;a href="https://github.com/libretro/glsl-shaders"&gt;libretro\'s&lt;/a&gt; shaders: Hyllian\'s xBR and CRT (MIT) and Timothy Lottes\' CRT (public domain); AMD\'s FSR (MIT) and &lt;a href="https://github.com/bloc97/Anime4K"&gt;Anime4K&lt;/a&gt; by bloc97 (MIT).&lt;br&gt;&lt;br&gt;Unofficial free project, not affiliated with the owners of the games. No game data included: you need your own copies. Not for sale.</string>
 
     <string name="game_failed_title">The game could not start</string>
     <string name="game_failed_message">Check that the ROM is the USA one and that the core matches this version of the app.\n\n%1$s</string>
@@ -101,7 +101,7 @@
     <string name="quick_fast_cores">Fast cores</string>
     <string name="quick_fast_cores_tip">Keeps the game on the processor\'s most powerful cores. Turn it off only if the device gets too hot.</string>
     <string name="quick_filter">Filter</string>
-    <string name="quick_filter_tip">Sharp smooth keeps the pixels as they are. xBR rounds edges and diagonals without blur. HD rebuilds the artwork and undoes the dithering, but looks softer. CRT Lottes (curved) and CRT Hyllian imitate a tube television. Scanlines and CRT effects only apply with Sharp, Smooth and Sharp smooth.</string>
+    <string name="quick_filter_tip">Sharp smooth keeps the pixels as they are. FSR upscales like modern games: clean edges without blocks. Anime4K redraws the picture with a neural network before FSR: M is balanced, 3D the lightest and GAN the strongest. xBR rounds edges, HD undoes the dithering, and CRT Lottes and CRT Hyllian imitate a tube television. Scanlines and CRT effects only apply with Sharp, Smooth and Sharp smooth.</string>
     <string-array name="quick_filters">
         <item>Sharp</item>
         <item>Smooth</item>
@@ -110,6 +110,10 @@
         <item>xBR (smooth edges)</item>
         <item>CRT Lottes</item>
         <item>CRT Hyllian</item>
+        <item>FSR (AMD)</item>
+        <item>Anime4K M</item>
+        <item>Anime4K 3D</item>
+        <item>Anime4K GAN</item>
     </string-array>
     <string name="quick_hd_level">HD level</string>
     <string name="quick_hd_level_tip">Low only undoes the dithering. Medium and high also round diagonals and gradients.</string>

@@ -25,6 +25,12 @@ are ported from libretro's glsl-shaders: Hyllian's xBR-lv2 and CRT shaders
 (MIT, copyright Hyllian, notices kept in the source), Timothy Lottes' CRT
 shader (public domain) and hunterk's mask collection (public domain).
 
+The FSR filter (`android/native/frontend/upscale.c`) is AMD FidelityFX Super
+Resolution 1 (EASU and RCAS, MIT, copyright Advanced Micro Devices), as ported
+in libretro's glsl-shaders. The Anime4K filters run the unmodified mpv shaders
+of [Anime4K](https://github.com/bloc97/Anime4K) (MIT, copyright bloc97), kept
+with their license in `android/native/third_party/anime4k`.
+
 The touch-control editor, quick menu and launcher follow KB-retro's own
 NFSU-X and G-Zero 64 Android ports.
 
