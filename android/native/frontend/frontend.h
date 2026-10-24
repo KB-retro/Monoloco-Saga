@@ -11,20 +11,19 @@ enum {
   kFilterSharpLinear = 2,
   kFilterReconstruct = 3,  // the second game's upscaler for pre-rendered pixel art
   kFilterXbr = 4,          // Hyllian's xBR: smooth diagonals, sharp edges
-  kFilterCrtLottes = 5,
-  kFilterCrtHyllian = 6,
-  kFilterFsr = 7,          // AMD FSR 1, then the Anime4K networks followed by FSR
-  kFilterAnime4kM = 8,
-  kFilterAnime4k3d = 9,
-  kFilterAnime4kGan = 10,
-  kFilterCount = 11,
+  kFilterFsr = 5,          // AMD FSR 1, then the Anime4K networks followed by FSR
+  kFilterAnime4kM = 6,
+  kFilterAnime4k3d = 7,
+  kFilterAnime4kGan = 8,
+  kFilterCount = 9,
 };
 
 enum {
   kEffectNone = 0,
   kEffectScanlines = 1,
   kEffectCrt = 2,
-  kEffectCount = 3,
+  kEffectCrtHyllian = 3,  // Hyllian's CRT shader (shaders.c)
+  kEffectCount = 4,
 };
 
 enum {

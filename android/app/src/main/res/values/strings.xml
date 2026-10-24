@@ -44,7 +44,7 @@
     <string name="settings_delete_cores_confirm">¿Borrar los núcleos importados? Los que trae la APK no se tocan.</string>
     <string name="settings_cores_deleted">Borrados: %d.</string>
     <string name="settings_back">Volver</string>
-    <string name="port_credits_body">Monoloco Saga de &lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt; (Patrulla Retro) · &lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;versión %1$s&lt;/a&gt;&lt;br&gt;&lt;br&gt;Port para Android basado en las recompilaciones estáticas de elliotttate y colaboradores: &lt;a href="https://github.com/elliotttate/DKC1Recomp"&gt;DKC1Recomp&lt;/a&gt;, &lt;a href="https://github.com/elliotttate/DKC2Recomp"&gt;DKC2Recomp&lt;/a&gt; y &lt;a href="https://github.com/elliotttate/DKC3Recomp"&gt;DKC3Recomp&lt;/a&gt; (licencia MIT), sobre &lt;a href="https://github.com/elliotttate/snesrecomp"&gt;snesrecomp&lt;/a&gt; (PolyForm Noncommercial 1.0.0), &lt;a href="https://github.com/libsdl-org/SDL"&gt;SDL2&lt;/a&gt; (zlib) y los shaders de &lt;a href="https://github.com/libretro/glsl-shaders"&gt;libretro&lt;/a&gt;: xBR y CRT de Hyllian (MIT) y CRT de Timothy Lottes (dominio público); FSR de AMD (MIT) y &lt;a href="https://github.com/bloc97/Anime4K"&gt;Anime4K&lt;/a&gt; de bloc97 (MIT).&lt;br&gt;&lt;br&gt;Proyecto no oficial y gratuito, sin relación con los propietarios de los juegos. No incluye datos de los juegos: necesitas tus propias copias. No se vende.</string>
+    <string name="port_credits_body">Monoloco Saga de &lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt; (Patrulla Retro) · &lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;versión %1$s&lt;/a&gt;&lt;br&gt;&lt;br&gt;Port para Android basado en las recompilaciones estáticas de elliotttate y colaboradores: &lt;a href="https://github.com/elliotttate/DKC1Recomp"&gt;DKC1Recomp&lt;/a&gt;, &lt;a href="https://github.com/elliotttate/DKC2Recomp"&gt;DKC2Recomp&lt;/a&gt; y &lt;a href="https://github.com/elliotttate/DKC3Recomp"&gt;DKC3Recomp&lt;/a&gt; (licencia MIT), sobre &lt;a href="https://github.com/elliotttate/snesrecomp"&gt;snesrecomp&lt;/a&gt; (PolyForm Noncommercial 1.0.0), &lt;a href="https://github.com/libsdl-org/SDL"&gt;SDL2&lt;/a&gt; (zlib) y los shaders de &lt;a href="https://github.com/libretro/glsl-shaders"&gt;libretro&lt;/a&gt;: xBR y CRT de Hyllian (MIT); FSR de AMD (MIT) y &lt;a href="https://github.com/bloc97/Anime4K"&gt;Anime4K&lt;/a&gt; de bloc97 (MIT).&lt;br&gt;&lt;br&gt;Proyecto no oficial y gratuito, sin relación con los propietarios de los juegos. No incluye datos de los juegos: necesitas tus propias copias. No se vende.</string>
 
     <string name="game_failed_title">No se pudo iniciar el juego</string>
     <string name="game_failed_message">Comprueba que la ROM es la de EE. UU. y que el núcleo corresponde a esta versión de la app.\n\n%1$s</string>
@@ -106,15 +106,13 @@
     <string name="quick_fast_cores">Núcleos rápidos</string>
     <string name="quick_fast_cores_tip">Mantiene el juego en los núcleos más potentes del procesador. Desactívalo solo si la consola se calienta demasiado.</string>
     <string name="quick_filter">Filtro</string>
-    <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles tal cual. FSR reescala como los juegos modernos: bordes limpios y sin cuadros. Anime4K redibuja la imagen con una red neuronal antes de FSR: M es el equilibrado, 3D el más ligero y GAN el más intenso. xBR redondea los bordes, HD deshace el tramado y CRT Lottes y CRT Hyllian imitan un televisor de tubo. Los efectos de líneas y CRT solo se aplican con Nítido, Suave y Nítido suavizado.</string>
+    <string name="quick_filter_tip">Nítido suavizado mantiene los píxeles tal cual. FSR reescala como los juegos modernos: bordes limpios y sin cuadros. Anime4K redibuja la imagen con una red neuronal antes de FSR: M es el equilibrado, 3D el más ligero y GAN el más intenso. xBR redondea los bordes y HD deshace el tramado. Los efectos solo se pueden usar con Nítido, Suave y Nítido suavizado.</string>
     <string-array name="quick_filters">
         <item>Nítido</item>
         <item>Suave</item>
         <item>Nítido suavizado</item>
         <item>HD (reconstruir)</item>
         <item>xBR (bordes suaves)</item>
-        <item>CRT Lottes</item>
-        <item>CRT Hyllian</item>
         <item>FSR (AMD)</item>
         <item>Anime4K M</item>
         <item>Anime4K 3D</item>
@@ -128,11 +126,12 @@
         <item>Alto</item>
     </string-array>
     <string name="quick_effect">Efecto</string>
-    <string name="quick_effect_tip">Líneas de barrido o un aspecto de televisor CRT.</string>
+    <string name="quick_effect_tip">Líneas de barrido, un televisor CRT o el CRT de Hyllian. Solo con los filtros Nítido, Suave y Nítido suavizado.</string>
     <string-array name="quick_effects">
         <item>Ninguno</item>
         <item>Líneas</item>
         <item>CRT</item>
+        <item>CRT Hyllian</item>
     </string-array>
     <string name="quick_volume">Volumen</string>
 

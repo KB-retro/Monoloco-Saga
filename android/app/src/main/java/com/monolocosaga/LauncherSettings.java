@@ -11,6 +11,9 @@ final class LauncherSettings {
         FAST_CORES = "fast_cores", HD_LEVEL = "hd_level";
     /** Sharp bilinear, full screen and square pixels unless the player picked otherwise. */
     static final int DEFAULT_FILTER = 2, DEFAULT_SCALE = 2, DEFAULT_SQUARE_PIXELS = 1;
+    /** Effects only apply to the plain filters: nearest, linear and sharp bilinear. */
+    static final int LAST_PLAIN_FILTER = 2, FILTER_HD = 3, EFFECT_CRT_HYLLIAN = 3;
+    private static final String VERSION = "settings_version";
 
     private LauncherSettings() { }
 
@@ -20,7 +23,19 @@ final class LauncherSettings {
      */
     @SuppressWarnings("deprecation")
     static SharedPreferences prefs(Context context) {
-        return context.getSharedPreferences("game", Context.MODE_MULTI_PROCESS);
+        SharedPreferences prefs = context.getSharedPreferences("game", Context.MODE_MULTI_PROCESS);
+        if (prefs.getInt(VERSION, 1) < 2) migrate(prefs);
+        return prefs;
+    }
+
+    /** Version 2 dropped the CRT Lottes filter (5) and made CRT Hyllian (6) an effect. */
+    private static void migrate(SharedPreferences prefs) {
+        SharedPreferences.Editor editor = prefs.edit().putInt(VERSION, 2);
+        int filter = prefs.getInt(FILTER, DEFAULT_FILTER);
+        if (filter == 5) editor.putInt(FILTER, DEFAULT_FILTER);
+        if (filter == 6) editor.putInt(FILTER, DEFAULT_FILTER).putInt(EFFECT, EFFECT_CRT_HYLLIAN);
+        if (filter > 6) editor.putInt(FILTER, filter - 2);
+        editor.apply();
     }
 
     static boolean autoStart(Context context) { return prefs(context).getBoolean("auto_start", false); }

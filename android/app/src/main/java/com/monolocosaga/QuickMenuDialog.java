@@ -16,6 +16,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -550,12 +551,39 @@ final class QuickMenuDialog {
     }
 
     private void addFilterRows() {
-        addChoice(R.string.quick_filter, R.string.quick_filter_tip,
-            setting(LauncherSettings.FILTER, LauncherSettings.DEFAULT_FILTER, R.array.quick_filters));
-        addChoice(R.string.quick_hd_level, R.string.quick_hd_level_tip,
+        final Choice filter = setting(LauncherSettings.FILTER, LauncherSettings.DEFAULT_FILTER, R.array.quick_filters);
+        final View[] dependent = new View[2];
+        final Runnable update = new Runnable() {
+            @Override public void run() {
+                // The HD level only serves HD; effects only the plain filters.
+                setRowEnabled(dependent[0], filter.get() == LauncherSettings.FILTER_HD);
+                setRowEnabled(dependent[1], filter.get() <= LauncherSettings.LAST_PLAIN_FILTER);
+            }
+        };
+        addChoice(R.string.quick_filter, R.string.quick_filter_tip, new Choice() {
+            @Override public String[] values() { return filter.values(); }
+            @Override public int get() { return filter.get(); }
+            @Override public void set(int value) {
+                filter.set(value);
+                update.run();
+            }
+        });
+        dependent[0] = addChoice(R.string.quick_hd_level, R.string.quick_hd_level_tip,
             setting(LauncherSettings.HD_LEVEL, 1, R.array.quick_hd_levels));
-        addChoice(R.string.quick_effect, R.string.quick_effect_tip,
+        dependent[1] = addChoice(R.string.quick_effect, R.string.quick_effect_tip,
             setting(LauncherSettings.EFFECT, 0, R.array.quick_effects));
+        update.run();
+    }
+
+    /** Greys a row out; a disabled row takes no focus, touch or controller input. */
+    private static void setRowEnabled(View row, boolean enabled) {
+        row.setAlpha(enabled ? 1f : 0.35f);
+        row.setEnabled(enabled);
+        row.setFocusable(enabled);
+        if (row instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) row;
+            for (int i = 0; i < group.getChildCount(); i++) group.getChildAt(i).setEnabled(enabled);
+        }
     }
 
     // ── Sound ───────────────────────────────────────────────────────────────────────────────────
@@ -622,7 +650,7 @@ final class QuickMenuDialog {
         rows.addView(button);
     }
 
-    private void addChoice(int label, final int tip, final Choice choice) {
+    private View addChoice(int label, final int tip, final Choice choice) {
         final TextView value = new TextView(activity);
         final Runnable refresh = new Runnable() {
             @Override public void run() {
@@ -631,7 +659,7 @@ final class QuickMenuDialog {
             }
         };
         refresh.run();
-        addValueRow(activity.getString(label), tip != 0 ? activity.getString(tip) : "", value, new Stepper() {
+        return addValueRow(activity.getString(label), tip != 0 ? activity.getString(tip) : "", value, new Stepper() {
             @Override public void step(int delta) {
                 int n = choice.values().length;
                 choice.set(((choice.get() + delta) % n + n) % n);
@@ -648,7 +676,7 @@ final class QuickMenuDialog {
         };
     }
 
-    private void addValueRow(String label, String describe, final TextView value, final Stepper stepper) {
+    private View addValueRow(String label, String describe, final TextView value, final Stepper stepper) {
         final LinearLayout line = new LinearLayout(activity);
         line.setGravity(Gravity.CENTER_VERTICAL);
         line.setMinimumHeight(dp(44));
@@ -694,6 +722,7 @@ final class QuickMenuDialog {
         line.addView(right, new LinearLayout.LayoutParams(dp(40), dp(40)));
         rows.addView(line, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+        return line;
     }
 
     private Button arrow(String symbol) {

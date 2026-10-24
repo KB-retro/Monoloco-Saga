@@ -22,12 +22,12 @@ static GLuint s_program, s_texture, s_vao, s_vbo;
 static GLint s_u_texture, s_u_source, s_u_output, s_u_filter, s_u_effect;
 static GLuint s_hd_program;
 static GLint s_hd_source, s_hd_size, s_hd_output, s_hd_mode, s_hd_strength, s_hd_softness, s_hd_shading;
-// xBR, CRT-Lottes and CRT-Hyllian (shaders.c), in filter order.
+// The xBR filter and the CRT Hyllian effect (shaders.c).
 typedef struct {
   GLuint program;
   GLint texture, source, output;
 } ExtraFilter;
-static ExtraFilter s_extra[kFilterCrtHyllian - kFilterXbr + 1];
+static ExtraFilter s_xbr, s_hyllian;
 static int s_tex_width, s_tex_height;
 static int s_frame_width = 256, s_frame_height = 224;
 static bool s_have_frame;
@@ -180,10 +180,11 @@ bool RenderInit(void) {
     s_hd_shading = glGetUniformLocation(s_hd_program, "shading");
   }
   // Optional too: a filter that does not build falls back to sharp bilinear.
-  const char *const extra[] = {kXbrFragment, kCrtLottesFragment, kCrtHyllianFragment};
-  for (int i = 0; i <= kFilterCrtHyllian - kFilterXbr; i++) {
-    ExtraFilter *filter = &s_extra[i];
-    filter->program = Link(kVertex, extra[i]);
+  ExtraFilter *const extra[] = {&s_xbr, &s_hyllian};
+  const char *const extra_source[] = {kXbrFragment, kCrtHyllianFragment};
+  for (int i = 0; i < 2; i++) {
+    ExtraFilter *filter = extra[i];
+    filter->program = Link(kVertex, extra_source[i]);
     if (!filter->program) continue;
     filter->texture = glGetUniformLocation(filter->program, "uTexture");
     filter->source = glGetUniformLocation(filter->program, "uSource");
@@ -221,10 +222,9 @@ void RenderShutdown(void) {
   if (s_program) glDeleteProgram(s_program);
   if (s_hd_program) glDeleteProgram(s_hd_program);
   UpscaleShutdown();
-  for (int i = 0; i <= kFilterCrtHyllian - kFilterXbr; i++) {
-    if (s_extra[i].program) glDeleteProgram(s_extra[i].program);
-    s_extra[i].program = 0;
-  }
+  if (s_xbr.program) glDeleteProgram(s_xbr.program);
+  if (s_hyllian.program) glDeleteProgram(s_hyllian.program);
+  s_xbr.program = s_hyllian.program = 0;
   s_texture = s_vbo = s_vao = s_program = s_hd_program = 0;
 }
 
@@ -304,9 +304,11 @@ void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
       UpscaleDraw(filter - kFilterFsr, s_texture, s_frame_width, s_frame_height,
                   (int)lroundf(width), (int)lroundf(height), s_vao, drawable_width, drawable_height))
     return;
-  if (filter >= kFilterXbr && filter <= kFilterCrtHyllian && s_extra[filter - kFilterXbr].program) {
-    // These pick their own texels, and the CRT ones replace the effects.
-    const ExtraFilter *extra = &s_extra[filter - kFilterXbr];
+  // xBR, and CRT Hyllian over the plain filters: they pick their own texels.
+  const ExtraFilter *extra = filter == kFilterXbr ? &s_xbr
+                           : filter <= kFilterSharpLinear && effect == kEffectCrtHyllian ? &s_hyllian
+                           : NULL;
+  if (extra && extra->program) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glUseProgram(extra->program);
@@ -317,7 +319,8 @@ void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
     glBindVertexArray(0);
     return;
   }
-  if (filter >= kFilterReconstruct) filter = kFilterSharpLinear;
+  if (filter > kFilterSharpLinear) filter = kFilterSharpLinear;
+  if (effect == kEffectCrtHyllian) effect = kEffectNone;  // its program did not build
   glUseProgram(s_program);
   GLint sampling = filter == kFilterNearest ? GL_NEAREST : GL_LINEAR;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling);

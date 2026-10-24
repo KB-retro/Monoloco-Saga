@@ -20,10 +20,10 @@ The HD filter is the Reconstruct upscaler of DKC2Recomp (MIT), compiled from
 `upstream/game2/runner/desktop_reconstruct_shader.h` and only translated to
 GLSL ES 3 at run time.
 
-The xBR, CRT-Lottes and CRT-Hyllian filters (`android/native/frontend/shaders.c`)
+The xBR filter and the CRT Hyllian effect (`android/native/frontend/shaders.c`)
 are ported from libretro's glsl-shaders: Hyllian's xBR-lv2 and CRT shaders
-(MIT, copyright Hyllian, notices kept in the source), Timothy Lottes' CRT
-shader (public domain) and hunterk's mask collection (public domain).
+(MIT, copyright Hyllian, notices kept in the source) and hunterk's mask
+collection (public domain).
 
 The FSR filter (`android/native/frontend/upscale.c`) is AMD FidelityFX Super
 Resolution 1 (EASU and RCAS, MIT, copyright Advanced Micro Devices), as ported

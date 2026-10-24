@@ -4,5 +4,4 @@
 #pragma once
 
 extern const char *const kXbrFragment;         // Hyllian's xBR-lv2 (MIT)
-extern const char *const kCrtLottesFragment;   // Timothy Lottes' CRT (public domain)
 extern const char *const kCrtHyllianFragment;  // Hyllian's CRT (MIT)
