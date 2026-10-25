@@ -90,7 +90,7 @@
         <item>Panorámico 16:9</item>
     </string-array>
     <string name="quick_scale">Tamaño</string>
-    <string name="quick_scale_tip">Entero usa múltiplos exactos de la imagen original: más nítida, con algo de borde.</string>
+    <string name="quick_scale_tip">Pantalla completa llena la pantalla con los formatos panorámicos; en 4:3 la imagen ocupa toda la altura sin deformarse, con bordes a los lados. Entero usa múltiplos exactos de la imagen original: más nítida, con algo de borde.</string>
     <string-array name="quick_scales">
         <item>Ajustar</item>
         <item>Entero</item>

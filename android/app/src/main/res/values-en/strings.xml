@@ -85,7 +85,7 @@
         <item>Widescreen 16:9</item>
     </string-array>
     <string name="quick_scale">Size</string>
-    <string name="quick_scale_tip">Integer uses exact multiples of the original picture: sharper, with some border.</string>
+    <string name="quick_scale_tip">Full screen fills the screen with the widescreen formats; in 4:3 the picture takes the whole height without stretching, with borders at the sides. Integer uses exact multiples of the original picture: sharper, with some border.</string>
     <string-array name="quick_scales">
         <item>Fit</item>
         <item>Integer</item>

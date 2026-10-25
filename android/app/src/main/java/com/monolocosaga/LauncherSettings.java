@@ -11,6 +11,8 @@ final class LauncherSettings {
         FAST_CORES = "fast_cores", HD_LEVEL = "hd_level", RESTORE = "restore";
     /** Sharp bilinear, full screen and square pixels unless the player picked otherwise. */
     static final int DEFAULT_FILTER = 2, DEFAULT_SCALE = 2, DEFAULT_SQUARE_PIXELS = 1;
+    /** Size: fit, integer or full screen (native kScale order). */
+    static final int SCALE_FIT = 0, SCALE_FULL_SCREEN = 2;
     /** Effects only apply to the plain filters: nearest, linear and sharp bilinear. */
     static final int LAST_PLAIN_FILTER = 2, FILTER_HD = 3, FILTER_FSR = 5, EFFECT_CRT_HYLLIAN = 3;
     private static final String VERSION = "settings_version";
@@ -75,9 +77,13 @@ final class LauncherSettings {
     /** Sends every picture and sound setting to the game. */
     static void apply(android.app.Activity activity) {
         try {
+            int aspect = aspect(activity);
+            int scale = get(activity, SCALE, DEFAULT_SCALE);
+            // Full screen stretches the widescreen pictures to the edges; a 4:3 one keeps its shape.
+            if (scale == SCALE_FULL_SCREEN && aspect == 0) scale = SCALE_FIT;
             GameBridge.nativeSetVideo(get(activity, FILTER, DEFAULT_FILTER), get(activity, EFFECT, 0),
-                get(activity, SCALE, DEFAULT_SCALE), get(activity, SQUARE_PIXELS, DEFAULT_SQUARE_PIXELS) == 0);
-            GameBridge.nativeSetAspect(aspect(activity));
+                scale, get(activity, SQUARE_PIXELS, DEFAULT_SQUARE_PIXELS) == 0);
+            GameBridge.nativeSetAspect(aspect);
             GameBridge.nativeSetVolume(get(activity, VOLUME, 100));
             GameBridge.nativeSetHdLevel(get(activity, HD_LEVEL, 1));
             GameBridge.nativeSetRestore(get(activity, RESTORE, 0) == 1);
