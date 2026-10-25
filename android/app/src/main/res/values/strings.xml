@@ -124,6 +124,8 @@
         <item>Medio</item>
         <item>Alto</item>
     </string-array>
+    <string name="quick_restore">Limpiar imagen (IA)</string>
+    <string name="quick_restore_tip">Anime4K Restore: una red neuronal quita el tramado y el ruido antes de reescalar, para un aspecto más limpio y remasterizado. Solo con FSR y Anime4K; gasta algo más de GPU.</string>
     <string name="quick_effect">Efecto</string>
     <string name="quick_effect_tip">Líneas de barrido, un televisor CRT o el CRT de Hyllian. Solo con los filtros Nítido, Suave y Nítido suavizado.</string>
     <string-array name="quick_effects">

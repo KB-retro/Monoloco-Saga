@@ -146,6 +146,11 @@ JNIEXPORT void JNICALL BRIDGE(nativeSetHdLevel)(JNIEnv *env, jclass cls, jint le
   atomic_store(&g_frontend.hd_level, level < 0 ? 0 : level > 2 ? 2 : level);
 }
 
+JNIEXPORT void JNICALL BRIDGE(nativeSetRestore)(JNIEnv *env, jclass cls, jboolean restore) {
+  (void)env; (void)cls;
+  atomic_store(&g_frontend.restore, restore == JNI_TRUE);
+}
+
 JNIEXPORT void JNICALL BRIDGE(nativeSetAspect)(JNIEnv *env, jclass cls, jint aspect) {
   (void)env; (void)cls;
   atomic_store(&g_frontend.aspect, Clamp(aspect, kMonolocoAspectCount));

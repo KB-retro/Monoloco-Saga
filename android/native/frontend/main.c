@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
     SDL_GL_GetDrawableSize(window, &width, &height);
     RenderDraw(width, height, atomic_load(&g_frontend.filter), atomic_load(&g_frontend.effect),
                atomic_load(&g_frontend.scale), atomic_load(&g_frontend.original_pixels),
-               atomic_load(&g_frontend.hd_level));
+               atomic_load(&g_frontend.hd_level), atomic_load(&g_frontend.restore));
     SDL_GL_SwapWindow(window);
     atomic_fetch_add(&g_frontend.presented_frames, 1);
     if (paused) SDL_Delay(8);  // the menu is up: no need to spin

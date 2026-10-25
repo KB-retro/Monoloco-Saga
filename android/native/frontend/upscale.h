@@ -27,7 +27,8 @@ void UpscaleInit(void);
 void UpscaleShutdown(void);
 // Draws the frame (frame_width x frame_height, BGRA) as a picture of
 // picture_width x picture_height with `picture_vao`, the quad that places it
-// on the drawable. Returns false when the method cannot run on this GPU.
-bool UpscaleDraw(int method, GLuint frame, int frame_width, int frame_height,
+// on the drawable; `restore` first cleans it with Anime4K Restore. Returns
+// false when the method cannot run on this GPU.
+bool UpscaleDraw(int method, bool restore, GLuint frame, int frame_width, int frame_height,
                  int picture_width, int picture_height, GLuint picture_vao,
                  int drawable_width, int drawable_height);

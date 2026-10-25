@@ -37,6 +37,9 @@ final class GameBridge {
     /** Reconstruct (the HD filter): 0 low, 1 medium, 2 high. */
     static native void nativeSetHdLevel(int level);
 
+    /** Anime4K Restore (clean picture) before FSR and the Anime4K filters. */
+    static native void nativeSetRestore(boolean restore);
+
     /** 0 original 4:3, 1 16:10, 2 16:9. */
     static native void nativeSetAspect(int aspect);
 

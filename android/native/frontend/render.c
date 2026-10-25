@@ -250,7 +250,7 @@ void RenderUpload(const uint8_t *pixels, int width, int height) {
 }
 
 void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
-                int scale, bool original_pixels, int hd_level) {
+                int scale, bool original_pixels, int hd_level, bool restore) {
   glViewport(0, 0, drawable_width, drawable_height);
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -301,7 +301,7 @@ void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
     return;
   }
   if (filter >= kFilterFsr &&
-      UpscaleDraw(filter - kFilterFsr, s_texture, s_frame_width, s_frame_height,
+      UpscaleDraw(filter - kFilterFsr, restore, s_texture, s_frame_width, s_frame_height,
                   (int)lroundf(width), (int)lroundf(height), s_vao, drawable_width, drawable_height))
     return;
   // xBR, and CRT Hyllian over the plain filters: they pick their own texels.

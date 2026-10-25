@@ -15,7 +15,7 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "Monoloco", __VA_ARGS__)
 #define COUNT(a) ((int)(sizeof(a) / sizeof((a)[0])))
 
-enum { kMaxBinds = 8, kMaxPasses = 16, kMaxRuns = 2, kNetworks = 2 };
+enum { kMaxBinds = 8, kMaxPasses = 16, kMaxRuns = 2, kNetworks = 3, kRestore = 2 };
 
 typedef struct {
   GLuint texture;
@@ -27,13 +27,15 @@ typedef struct {
   GLint output, sharpness, raw[kMaxBinds], size[kMaxBinds];
 } Pass;
 
-// Each network doubles the picture and runs twice (x4), in kUpscale order.
+// Light and Full (kUpscale order) double the picture and run twice (x4);
+// Restore keeps its size and runs once, before them or FSR.
 static const struct {
   const HookPass *passes;
   int count, runs;
 } kNetworkTable[kNetworks] = {
     {kAnime4kLightPasses, COUNT(kAnime4kLightPasses), 2},
     {kAnime4kFullPasses, COUNT(kAnime4kFullPasses), 2},
+    {kAnime4kRestorePasses, COUNT(kAnime4kRestorePasses), 1},
 };
 
 static GLuint s_full_vao, s_full_vbo, s_framebuffer;
@@ -405,7 +407,7 @@ static const Target *RunNetwork(int network, const Target *main) {
   return main;
 }
 
-bool UpscaleDraw(int method, GLuint frame, int frame_width, int frame_height,
+bool UpscaleDraw(int method, bool restore, GLuint frame, int frame_width, int frame_height,
                  int picture_width, int picture_height, GLuint picture_vao,
                  int drawable_width, int drawable_height) {
   if (!s_ready || picture_width <= 0 || picture_height <= 0) return false;
@@ -420,12 +422,18 @@ bool UpscaleDraw(int method, GLuint frame, int frame_width, int frame_height,
   Ensure(&s_source, frame_width, frame_height, false, GL_LINEAR);
   Run(&s_unpack, &s_source, &input, 1);
   const Target *upscaled = &s_source;
+  if (restore && NetworkReady(kRestore)) {
+    const Target *restored = RunNetwork(kRestore, &s_source);
+    if (restored) upscaled = restored;
+    else s_network_state[kRestore] = -1;
+  }
   if (network >= 0) {
-    upscaled = RunNetwork(network, &s_source);
-    if (!upscaled) {
+    const Target *result = RunNetwork(network, upscaled);
+    if (result) {
+      upscaled = result;
+    } else {
       LOGE("Anime4K network %d is incomplete", network);
       s_network_state[network] = -1;
-      upscaled = &s_source;
       network = -1;
     }
   }

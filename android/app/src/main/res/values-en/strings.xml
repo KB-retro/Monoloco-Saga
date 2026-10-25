@@ -119,6 +119,8 @@
         <item>Medium</item>
         <item>High</item>
     </string-array>
+    <string name="quick_restore">Clean picture (AI)</string>
+    <string name="quick_restore_tip">Anime4K Restore: a neural network removes dithering and noise before upscaling, for a cleaner, remastered look. Only with FSR and Anime4K; it uses a little more GPU.</string>
     <string name="quick_effect">Effect</string>
     <string name="quick_effect_tip">Scanlines, a CRT television or Hyllian\'s CRT. Only with the Sharp, Smooth and Sharp smooth filters.</string>
     <string-array name="quick_effects">

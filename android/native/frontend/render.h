@@ -10,4 +10,4 @@ void RenderShutdown(void);
 void RenderUpload(const uint8_t *pixels, int width, int height);
 // Draws the last uploaded frame into the drawable of the given size.
 void RenderDraw(int drawable_width, int drawable_height, int filter, int effect,
-                int scale, bool original_pixels, int hd_level);
+                int scale, bool original_pixels, int hd_level, bool restore);

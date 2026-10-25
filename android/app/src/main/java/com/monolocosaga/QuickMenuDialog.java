@@ -552,12 +552,13 @@ final class QuickMenuDialog {
 
     private void addFilterRows() {
         final Choice filter = setting(LauncherSettings.FILTER, LauncherSettings.DEFAULT_FILTER, R.array.quick_filters);
-        final View[] dependent = new View[2];
+        final View[] dependent = new View[3];
         final Runnable update = new Runnable() {
             @Override public void run() {
-                // The HD level only serves HD; effects only the plain filters.
+                // The HD level only serves HD, cleaning FSR and Anime4K, effects the plain filters.
                 setRowEnabled(dependent[0], filter.get() == LauncherSettings.FILTER_HD);
-                setRowEnabled(dependent[1], filter.get() <= LauncherSettings.LAST_PLAIN_FILTER);
+                setRowEnabled(dependent[1], filter.get() >= LauncherSettings.FILTER_FSR);
+                setRowEnabled(dependent[2], filter.get() <= LauncherSettings.LAST_PLAIN_FILTER);
             }
         };
         addChoice(R.string.quick_filter, R.string.quick_filter_tip, new Choice() {
@@ -570,7 +571,9 @@ final class QuickMenuDialog {
         });
         dependent[0] = addChoice(R.string.quick_hd_level, R.string.quick_hd_level_tip,
             setting(LauncherSettings.HD_LEVEL, 1, R.array.quick_hd_levels));
-        dependent[1] = addChoice(R.string.quick_effect, R.string.quick_effect_tip,
+        dependent[1] = addChoice(R.string.quick_restore, R.string.quick_restore_tip,
+            setting(LauncherSettings.RESTORE, 0, R.array.quick_off_on));
+        dependent[2] = addChoice(R.string.quick_effect, R.string.quick_effect_tip,
             setting(LauncherSettings.EFFECT, 0, R.array.quick_effects));
         update.run();
     }

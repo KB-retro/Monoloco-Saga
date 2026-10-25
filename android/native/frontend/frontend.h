@@ -53,6 +53,7 @@ typedef struct FrontendShared {
   _Atomic int filter;
   _Atomic int effect;
   _Atomic int hd_level;          // Reconstruct: 0 low, 1 medium, 2 high
+  _Atomic bool restore;          // Anime4K Restore before FSR and the Anime4K filters
   _Atomic int scale;
   _Atomic bool original_pixels;  // the console's 8:7 pixels, else square
   _Atomic int aspect;            // kMonolocoAspect*

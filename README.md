@@ -22,7 +22,7 @@ y RG477M.
   la pantalla o pulsando el mando.
 - **Menú rápido** con el botón Atrás: pausa el juego. Incluye imagen (formato, filtro, efecto,
   proporción de píxel; filtros Nítido, Suave, Nítido suavizado, HD, xBR, FSR y los
-  reescaladores neuronales Anime4K Light y Full; efectos Líneas, CRT y CRT Hyllian), sonido,
+  reescaladores neuronales Anime4K Light y Full, con limpieza opcional Anime4K Restore; efectos Líneas, CRT y CRT Hyllian), sonido,
   guardado y carga rápida, controles táctiles y contador de FPS.
 - **Controles táctiles** con editor (mover, cambiar tamaño, cuadrícula y preajustes en XML).
   Se ocultan solos si hay un mando conectado.

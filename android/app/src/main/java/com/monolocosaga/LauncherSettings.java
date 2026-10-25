@@ -8,11 +8,11 @@ final class LauncherSettings {
     // Picture: format 0 automatic, 1 original 4:3, 2 16:10, 3 16:9.
     static final String FORMAT = "format", SCALE = "scale", SQUARE_PIXELS = "square_pixels",
         FILTER = "filter", EFFECT = "effect", VOLUME = "volume", FPS = "fps", SLOT = "slot",
-        FAST_CORES = "fast_cores", HD_LEVEL = "hd_level";
+        FAST_CORES = "fast_cores", HD_LEVEL = "hd_level", RESTORE = "restore";
     /** Sharp bilinear, full screen and square pixels unless the player picked otherwise. */
     static final int DEFAULT_FILTER = 2, DEFAULT_SCALE = 2, DEFAULT_SQUARE_PIXELS = 1;
     /** Effects only apply to the plain filters: nearest, linear and sharp bilinear. */
-    static final int LAST_PLAIN_FILTER = 2, FILTER_HD = 3, EFFECT_CRT_HYLLIAN = 3;
+    static final int LAST_PLAIN_FILTER = 2, FILTER_HD = 3, FILTER_FSR = 5, EFFECT_CRT_HYLLIAN = 3;
     private static final String VERSION = "settings_version";
 
     private LauncherSettings() { }
@@ -80,6 +80,7 @@ final class LauncherSettings {
             GameBridge.nativeSetAspect(aspect(activity));
             GameBridge.nativeSetVolume(get(activity, VOLUME, 100));
             GameBridge.nativeSetHdLevel(get(activity, HD_LEVEL, 1));
+            GameBridge.nativeSetRestore(get(activity, RESTORE, 0) == 1);
             GameBridge.nativeSetFastCores(get(activity, FAST_CORES, 1) == 1);
         } catch (UnsatisfiedLinkError error) {
             android.util.Log.w("Monoloco", "Game library not loaded", error);
