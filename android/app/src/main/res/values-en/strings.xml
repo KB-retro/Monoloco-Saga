@@ -101,7 +101,7 @@
     <string name="quick_fast_cores">Fast cores</string>
     <string name="quick_fast_cores_tip">Keeps the game on the processor\'s most powerful cores. Turn it off only if the device gets too hot.</string>
     <string name="quick_filter">Filter</string>
-    <string name="quick_filter_tip">Sharp smooth keeps the pixels as they are. FSR upscales like modern games: clean edges without blocks. Anime4K redraws the picture with a neural network before FSR: Light is the light version and Full the complete one, sharper and heavier. xBR rounds edges and HD undoes the dithering. Effects can only be used with Sharp, Smooth and Sharp smooth.</string>
+    <string name="quick_filter_tip">Sharp smooth keeps the pixels as they are. FSR upscales like modern games: clean edges without blocks. Anime4K redraws the picture with a neural network before FSR: Light is the light version, Full the complete one and Ultra uses the largest network: the sharpest and the heaviest on the GPU. xBR rounds edges and HD undoes the dithering. Effects can only be used with Sharp, Smooth and Sharp smooth.</string>
     <string-array name="quick_filters">
         <item>Sharp</item>
         <item>Smooth</item>
@@ -111,6 +111,7 @@
         <item>FSR (AMD)</item>
         <item>Anime4K Light</item>
         <item>Anime4K Full</item>
+        <item>Anime4K Ultra</item>
     </string-array>
     <string name="quick_hd_level">HD level</string>
     <string name="quick_hd_level_tip">Low only undoes the dithering. Medium and high also round diagonals and gradients.</string>

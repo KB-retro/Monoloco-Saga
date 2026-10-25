@@ -15,9 +15,10 @@ OUTPUT = ROOT / "native" / "frontend" / "anime4k_shaders.h"
 SHADERS = [  # C name, file
     ("kAnime4kLight", "Anime4K_3DGraphics_Upscale_x2_US.glsl"),
     ("kAnime4kFull", "Anime4K_Upscale_CNN_x2_M.glsl"),
+    ("kAnime4kUltra", "Anime4K_Upscale_CNN_x2_VL.glsl"),
     ("kAnime4kRestore", "Anime4K_Restore_CNN_M.glsl"),
 ]
-MAX_BINDS = 8
+MAX_BINDS = 16
 
 
 def size_of(tokens):

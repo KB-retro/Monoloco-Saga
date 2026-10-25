@@ -14,7 +14,8 @@ enum {
   kFilterFsr = 5,          // AMD FSR 1, then the Anime4K networks followed by FSR
   kFilterAnime4kLight = 6,
   kFilterAnime4kFull = 7,
-  kFilterCount = 8,
+  kFilterAnime4kUltra = 8,
+  kFilterCount = 9,
 };
 
 enum {

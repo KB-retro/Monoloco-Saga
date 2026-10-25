@@ -15,7 +15,7 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "Monoloco", __VA_ARGS__)
 #define COUNT(a) ((int)(sizeof(a) / sizeof((a)[0])))
 
-enum { kMaxBinds = 8, kMaxPasses = 16, kMaxRuns = 2, kNetworks = 3, kRestore = 2 };
+enum { kMaxBinds = 16, kMaxPasses = 24, kMaxRuns = 2, kNetworks = 4, kFull = 1, kRestore = 3 };
 
 typedef struct {
   GLuint texture;
@@ -27,15 +27,18 @@ typedef struct {
   GLint output, sharpness, raw[kMaxBinds], size[kMaxBinds];
 } Pass;
 
-// Light and Full (kUpscale order) double the picture and run twice (x4);
+// Light and Full (kUpscale order) double the picture and run twice (x4).
+// Ultra's large network doubles it once and Full doubles it again: the
+// second doubling of the large one costs four times as much for little.
 // Restore keeps its size and runs once, before them or FSR.
 static const struct {
   const HookPass *passes;
-  int count, runs;
+  int count, runs, then;
 } kNetworkTable[kNetworks] = {
-    {kAnime4kLightPasses, COUNT(kAnime4kLightPasses), 2},
-    {kAnime4kFullPasses, COUNT(kAnime4kFullPasses), 2},
-    {kAnime4kRestorePasses, COUNT(kAnime4kRestorePasses), 1},
+    {kAnime4kLightPasses, COUNT(kAnime4kLightPasses), 2, -1},
+    {kAnime4kFullPasses, COUNT(kAnime4kFullPasses), 2, -1},
+    {kAnime4kUltraPasses, COUNT(kAnime4kUltraPasses), 1, kFull},
+    {kAnime4kRestorePasses, COUNT(kAnime4kRestorePasses), 1, -1},
 };
 
 static GLuint s_full_vao, s_full_vbo, s_framebuffer;
@@ -376,14 +379,14 @@ static bool NetworkReady(int network) {
 }
 
 // Runs a network over `main` (its runs each double it); returns the result.
-static const Target *RunNetwork(int network, const Target *main) {
-  for (int run = 0; run < kNetworkTable[network].runs; run++) {
+static const Target *RunNetwork(int network, const Target *main, int first_run, int runs) {
+  for (int run = first_run; run < first_run + runs; run++) {
     const char *names[kMaxPasses + 1] = {"MAIN"};
     const Target *textures[kMaxPasses + 1] = {main};
     int named = 1;
     for (int p = 0; p < kNetworkTable[network].count; p++) {
       const HookPass *pass = &kNetworkTable[network].passes[p];
-      const Target *inputs[8] = {NULL};
+      const Target *inputs[kMaxBinds] = {NULL};
       const Target *reference = NULL;
       for (int n = 0; n < named; n++) {
         if (!strcmp(names[n], pass->size_of)) reference = textures[n];
@@ -423,12 +426,18 @@ bool UpscaleDraw(int method, bool restore, GLuint frame, int frame_width, int fr
   Run(&s_unpack, &s_source, &input, 1);
   const Target *upscaled = &s_source;
   if (restore && NetworkReady(kRestore)) {
-    const Target *restored = RunNetwork(kRestore, &s_source);
+    const Target *restored = RunNetwork(kRestore, &s_source, 0, 1);
     if (restored) upscaled = restored;
     else s_network_state[kRestore] = -1;
   }
   if (network >= 0) {
-    const Target *result = RunNetwork(network, upscaled);
+    const Target *result = RunNetwork(network, upscaled, 0, kNetworkTable[network].runs);
+    // Ultra's second doubling uses Full's second run (and its textures).
+    int then = kNetworkTable[network].then;
+    if (result && then >= 0 && NetworkReady(then)) {
+      const Target *again = RunNetwork(then, result, 1, 1);
+      if (again) result = again;
+    }
     if (result) {
       upscaled = result;
     } else {

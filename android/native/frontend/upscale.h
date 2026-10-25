@@ -9,14 +9,15 @@ enum {
   kUpscaleFsr = 0,
   kUpscaleAnime4kLight = 1,  // Anime4K's 3D graphics network
   kUpscaleAnime4kFull = 2,   // Anime4K's CNN M
-  kUpscaleCount = 3,
+  kUpscaleAnime4kUltra = 3,  // Anime4K's CNN VL, then CNN M
+  kUpscaleCount = 4,
 };
 
 // One pass of an mpv user shader (anime4k_shaders.h): it reads `binds`, writes
 // `save` and is as large as `size_of` times `scale`.
 typedef struct {
   const char *source;
-  const char *binds[8];
+  const char *binds[16];
   int bind_count;
   const char *save;
   const char *size_of;
