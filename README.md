@@ -20,6 +20,12 @@ y RG477M.
   Elegir carpeta no arranca el juego. Los ajustes de imagen y sonido son los mismos para las
   tres entregas (por defecto, pantalla completa y píxel cuadrado). El inicio automático es opcional y se cancela tocando
   la pantalla o pulsando el mando.
+- **ROM hacks (experimental):** en la misma carpeta, junto a las ROM originales, puedes poner
+  parches `.bps` o `.ips` o ROM ya parcheadas. La app reconoce a qué juego pertenece cada uno
+  (los `.ips` te los pregunta la primera vez), aplica el parche sobre tu ROM original y en el
+  lanzador eliges la versión con izquierda/derecha. Cada versión tiene sus propias partidas.
+  Funcionan los hacks que solo cambian datos (niveles, gráficos, textos) y de 4 MB; los que
+  cambian el código o amplían la ROM, no. Si añades hacks después, vuelve a elegir la carpeta.
 - **Menú rápido** con el botón Atrás: pausa el juego. Incluye imagen (formato, filtro, efecto,
   proporción de píxel; filtros Nítido, Suave, Nítido suavizado, HD, xBR, FSR y los
   reescaladores neuronales Anime4K Light, Full y Ultra, con limpieza opcional Anime4K Restore; efectos Líneas, CRT y CRT Hyllian), sonido,

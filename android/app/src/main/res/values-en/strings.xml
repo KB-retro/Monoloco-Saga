@@ -25,6 +25,15 @@
     <string name="launcher_found_core">✓ %1$s core</string>
     <string name="launcher_unknown_roms">Unrecognised 4 MB files: %1$d (another region or revision?)</string>
     <string name="launcher_bad_cores">Invalid cores: %1$d</string>
+    <string name="launcher_found_hack">✓ %1$s hack: %2$s</string>
+    <string name="launcher_bad_patches">Patches that do not fit your USA ROMs, are damaged or expand the ROM: %1$d</string>
+    <string name="launcher_version">‹ Version: %1$s ›</string>
+    <string name="launcher_version_original">Original</string>
+    <string name="launcher_hack_description">Modified version: “%1$s” (experimental). The game was compiled from the original ROM, so hacks that change levels, graphics or text work well; those that change the code may fail. It has its own saves.</string>
+    <string name="launcher_ips_title">Which game is “%1$s” for?</string>
+    <string name="launcher_ips_none">None of these</string>
+    <string name="launcher_ips_ok">OK</string>
+    <string name="launcher_ips_failed">✗ “%1$s” does not fit that ROM or expands it</string>
     <string name="launcher_crashed">The last session stopped with an error: %1$s</string>
     <string name="launcher_credits">&lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;Version %1$s&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro/Monoloco-Saga"&gt;Repository&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt;</string>
 
@@ -72,6 +81,9 @@
     <string name="quick_saved">Saved in slot %d.</string>
     <string name="quick_save_failed">Could not save.</string>
     <string name="quick_load_failed">Could not load that slot.</string>
+    <string name="quick_version">Version: %1$s</string>
+    <string name="quick_change_version">Change version</string>
+    <string name="quick_change_version_tip">Saves and goes back to the launcher to pick another version of this game (original or hack).</string>
     <string name="quick_restart">Restart the game</string>
     <string name="quick_restart_tip">Starts again from the game\'s title screen.</string>
     <string name="quick_restart_confirm">Restart? Anything unsaved will be lost.</string>

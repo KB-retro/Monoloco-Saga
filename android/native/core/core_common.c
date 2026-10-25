@@ -9,6 +9,7 @@
 
 #include <android/log.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,6 +44,34 @@ void __wrap_Die(const char *error) {
   __real_Die(error);
 }
 
+// A ROM hack (the launcher patched the verified ROM, or found one patched):
+// any payload of the retail size. The native code still comes from the retail
+// ROM, so only hacks that change data (levels, graphics, text) play right.
+static uint8_t *ReadModifiedRom(const char *path, size_t *size, char *error, size_t error_size) {
+  enum { kRomSize = 0x400000, kHeader = 512 };
+  FILE *file = fopen(path, "rb");
+  if (!file) {
+    SetError(error, error_size, "unable to open the modified ROM");
+    return NULL;
+  }
+  uint8_t *rom = malloc(kRomSize + kHeader);
+  size_t length = rom ? fread(rom, 1, kRomSize + kHeader, file) : 0;
+  bool longer = rom && fgetc(file) != EOF;
+  fclose(file);
+  if (!rom) {
+    SetError(error, error_size, "not enough memory to load the ROM");
+    return NULL;
+  }
+  if (longer || (length != kRomSize && length != kRomSize + kHeader)) {
+    SetError(error, error_size, "the modified ROM is not 4 MB; expanded hacks are not supported");
+    free(rom);
+    return NULL;
+  }
+  if (length == kRomSize + kHeader) memmove(rom, rom + kHeader, kRomSize);
+  *size = kRomSize;
+  return rom;
+}
+
 static void SnapshotSram(void) {
   if (!g_sram || g_sram_size <= 0) return;
   if (!s_sram_copy) s_sram_copy = malloc((size_t)g_sram_size);
@@ -64,11 +93,14 @@ static int CoreLoad(const char *rom_path, const char *save_dir, int aspect,
   // Relative, like the desktop hosts: the runtime keeps short path buffers.
   RtlSetSaveRoot("saves");
   size_t size = 0;
-  s_rom = GameReadVerifiedRom(rom_path, &size, error, error_size);
+  // Set by the frontend for a ROM hack (see ReadModifiedRom).
+  const char *modified = getenv("MONOLOCO_MODIFIED_ROM");
+  s_rom = modified && *modified ? ReadModifiedRom(rom_path, &size, error, error_size)
+                                : GameReadVerifiedRom(rom_path, &size, error, error_size);
   if (!s_rom) return 0;
   if (aspect < 0 || aspect >= kMonolocoAspectCount) aspect = kMonolocoAspectNative;
   if (!GameStart(s_rom, size, aspect)) {
-    SetError(error, error_size, "the runtime rejected the verified ROM");
+    SetError(error, error_size, "the runtime rejected the ROM");
     free(s_rom);
     s_rom = NULL;
     return 0;

@@ -51,15 +51,19 @@ public final class GameActivity extends SDLActivity {
         return new String[] { "SDL2", "main" };
     }
 
-    /** SDL_main's arguments: game number, core library, ROM, save folder. */
+    /**
+     * SDL_main's arguments: game number, core library, ROM, save folder, and "modified" for a ROM
+     * hack (the core then accepts a ROM that is not the verified retail one).
+     */
     @Override
     protected String[] getArguments() {
         File core = Games.core(this, game);
         return new String[] {
             String.valueOf(game),
             core != null ? core.getAbsolutePath() : "",
-            Games.rom(this, game).getAbsolutePath(),
-            Games.dir(this, game).getAbsolutePath(),
+            Games.playRom(this, game).getAbsolutePath(),
+            Games.saveDir(this, game).getAbsolutePath(),
+            Games.version(this, game).isEmpty() ? "original" : "modified",
         };
     }
 

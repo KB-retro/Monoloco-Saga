@@ -410,7 +410,7 @@ final class QuickMenuDialog {
     // ── Game: quick save and load ───────────────────────────────────────────────────────────────
 
     private int slot() {
-        return Math.max(1, Math.min(SLOTS, LauncherSettings.get(activity, LauncherSettings.SLOT + activity.game(), 1)));
+        return Math.max(1, Math.min(SLOTS, LauncherSettings.get(activity, LauncherSettings.SLOT + activity.game() + Games.version(activity, activity.game()), 1)));
     }
 
     private File stateFile(int slot) {
@@ -432,7 +432,7 @@ final class QuickMenuDialog {
             }
             @Override public int get() { return slot() - 1; }
             @Override public void set(int value) {
-                LauncherSettings.set(activity, LauncherSettings.SLOT + activity.game(), value + 1);
+                LauncherSettings.set(activity, LauncherSettings.SLOT + activity.game() + Games.version(activity, activity.game()), value + 1);
             }
         });
         addButton(R.string.quick_save_state, R.string.quick_save_state_tip, new Runnable() {
@@ -447,6 +447,21 @@ final class QuickMenuDialog {
                 loadState();
             }
         });
+        // With ROM hacks: which version is playing; another one starts from the launcher.
+        if (!Games.hacks(activity, activity.game()).isEmpty()) {
+            TextView version = new TextView(activity);
+            version.setText(activity.getString(R.string.quick_version, Games.versionName(activity, activity.game())));
+            version.setTextSize(14);
+            version.setTextColor(0xFFFFD98A);
+            version.setPadding(dp(8), dp(8), dp(8), dp(4));
+            rows.addView(version);
+            addButton(R.string.quick_change_version, R.string.quick_change_version_tip, new Runnable() {
+                @Override public void run() {
+                    dialog.dismiss();
+                    activity.backToLauncher(false);
+                }
+            });
+        }
         addButton(R.string.quick_restart, R.string.quick_restart_tip, new Runnable() {
             @Override public void run() {
                 new AlertDialog.Builder(activity)

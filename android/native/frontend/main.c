@@ -167,7 +167,11 @@ int main(int argc, char *argv[]) {
   }
   int game = atoi(argv[1]);
   const char *core_path = argv[2], *rom_path = argv[3], *save_dir = argv[4];
-  LOGI("game %d core %s", game, core_path);
+  // A ROM hack: the core then takes any 4 MB ROM (core_common.c).
+  bool modified = argc > 5 && !strcmp(argv[5], "modified");
+  if (modified) setenv("MONOLOCO_MODIFIED_ROM", "1", 1);
+  else unsetenv("MONOLOCO_MODIFIED_ROM");
+  LOGI("game %d core %s%s", game, core_path, modified ? " (modified ROM)" : "");
 
   SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "0");
   SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");

@@ -29,6 +29,15 @@
     <string name="launcher_found_core">✓ Núcleo de %1$s</string>
     <string name="launcher_unknown_roms">Archivos de 4 MB no reconocidos: %1$d (¿otra región o versión?)</string>
     <string name="launcher_bad_cores">Núcleos no válidos: %1$d</string>
+    <string name="launcher_found_hack">✓ Hack de %1$s: %2$s</string>
+    <string name="launcher_bad_patches">Parches que no encajan con tus ROM USA, dañados o que amplían la ROM: %1$d</string>
+    <string name="launcher_version">‹ Versión: %1$s ›</string>
+    <string name="launcher_version_original">Original</string>
+    <string name="launcher_hack_description">Versión modificada: «%1$s» (experimental). El juego se compiló a partir de la ROM original, así que funcionan bien los hacks que cambian niveles, gráficos o textos; los que cambian el código pueden fallar. Tiene sus propias partidas guardadas.</string>
+    <string name="launcher_ips_title">¿A qué juego pertenece «%1$s»?</string>
+    <string name="launcher_ips_none">A ninguno de estos</string>
+    <string name="launcher_ips_ok">Aceptar</string>
+    <string name="launcher_ips_failed">✗ «%1$s» no encaja con esa ROM o la amplía</string>
     <string name="launcher_crashed">La última partida se cerró por un error: %1$s</string>
     <string name="launcher_credits">&lt;a href="https://github.com/KB-retro/Monoloco-Saga/commit/%2$s"&gt;Versión %1$s&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro/Monoloco-Saga"&gt;Repositorio&lt;/a&gt;　/　&lt;a href="https://github.com/KB-retro"&gt;KB-retro&lt;/a&gt;</string>
 
@@ -77,6 +86,9 @@
     <string name="quick_saved">Guardado en la ranura %d.</string>
     <string name="quick_save_failed">No se pudo guardar.</string>
     <string name="quick_load_failed">No se pudo cargar esa ranura.</string>
+    <string name="quick_version">Versión: %1$s</string>
+    <string name="quick_change_version">Cambiar versión</string>
+    <string name="quick_change_version_tip">Guarda y vuelve al lanzador para elegir otra versión de este juego (original o hack).</string>
     <string name="quick_restart">Reiniciar el juego</string>
     <string name="quick_restart_tip">Vuelve a empezar desde la pantalla de inicio del juego.</string>
     <string name="quick_restart_confirm">¿Reiniciar? Lo que no hayas guardado se perderá.</string>

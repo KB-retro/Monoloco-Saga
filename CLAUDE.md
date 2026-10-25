@@ -44,6 +44,10 @@ Repo: https://github.com/KB-retro/Monoloco-Saga. No fusionar cambios de upstream
   con `tools/build_cores.sh` (se copia a `files/cores/` y se marca de solo lectura).
 - Las ROM se importan desde la carpeta elegida: se reconocen por tamaño y SHA-256 (se quita la
   cabecera de 512 bytes si la hay) y se copian a `<carpeta de la app>/gameN/rom.sfc`.
+- ROM hacks (versiones): parches `.bps` (por el CRC de origen), `.ips` (se pregunta el juego) o ROM
+  parcheadas de 4 MB (por el título de la cabecera) en `gameN/hacks/<id>/` con su `rom.sfc`,
+  `name.txt` y partidas propias. El frontend recibe `modified` y el núcleo acepta cualquier ROM de
+  4 MB (`MONOLOCO_MODIFIED_ROM`); el código sigue siendo el de la ROM original.
 - Entrada del mando empaquetada como en los originales: B=0 Y=1 Select=2 Start=3 Arriba=4 Abajo=5
   Izquierda=6 Derecha=7 A=8 X=9 L=10 R=11 (jugador 2 desplazado 12 bits).
 - Imagen del núcleo: BGRA (ARGB8888 en memoria), 224 líneas, ancho variable (256 en 4:3).

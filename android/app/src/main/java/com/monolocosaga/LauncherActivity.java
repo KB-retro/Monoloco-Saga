@@ -44,6 +44,8 @@ public final class LauncherActivity extends Activity {
     };
     private final View[] rows = new View[Games.COUNT + 1];
     private final TextView[] states = new TextView[Games.COUNT + 1];
+    /** "‹ Version: … ›" under a game with ROM hacks; left/right or a tap change it. */
+    private final TextView[] versions = new TextView[Games.COUNT + 1];
     private boolean rescanned;
     private TextView status;
     private Button play;
@@ -125,7 +127,25 @@ public final class LauncherActivity extends Activity {
             states[g].setText(!core ? R.string.launcher_state_no_core
                 : rom ? R.string.launcher_state_ready : R.string.launcher_state_no_rom);
             states[g].setTextColor(!core ? 0xFF8E9A94 : rom ? 0xFF6FE3A4 : 0xFFF3C28C);
+            boolean hacks = rom && !Games.hacks(this, g).isEmpty();
+            versions[g].setVisibility(hacks ? View.VISIBLE : View.GONE);
+            if (hacks) versions[g].setText(getString(R.string.launcher_version, Games.versionName(this, g)));
         }
+    }
+
+    /** The next or previous version of a game: the original, then its hacks by name. */
+    private void stepVersion(int which, int delta) {
+        List<Games.Hack> hacks = Games.hacks(this, which);
+        if (hacks.isEmpty()) return;
+        List<String> ids = new ArrayList<>();
+        ids.add("");
+        for (Games.Hack hack : hacks) ids.add(hack.id);
+        int index = Math.max(0, ids.indexOf(Games.version(this, which)));
+        index = ((index + delta) % ids.size() + ids.size()) % ids.size();
+        Games.setVersion(this, which, ids.get(index));
+        importMessage = "";
+        if (which != game) Games.select(this, which);
+        showGame(which, false);
     }
 
     private void buildGameList() {
@@ -161,15 +181,36 @@ public final class LauncherActivity extends Activity {
             TextView state = new TextView(this);
             state.setTextSize(12);
             state.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            final TextView version = new TextView(this);
+            version.setTextSize(12);
+            version.setTextColor(0xFFFFD98A);
+            version.setVisibility(View.GONE);
+            version.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View view) { stepVersion(which, 1); }
+            });
             text.addView(title);
             text.addView(subtitle);
             text.addView(state);
+            text.addView(version);
             states[g] = state;
+            versions[g] = version;
             row.addView(text, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
             row.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View view) {
                     if (which == game && Games.ready(LauncherActivity.this, which)) startGame();
                     else selectGame(which);
+                }
+            });
+            // Controller: left/right on a game change its version.
+            row.setOnKeyListener(new View.OnKeyListener() {
+                @Override public boolean onKey(View view, int keyCode, android.view.KeyEvent event) {
+                    if (keyCode != android.view.KeyEvent.KEYCODE_DPAD_LEFT
+                            && keyCode != android.view.KeyEvent.KEYCODE_DPAD_RIGHT) return false;
+                    if (Games.hacks(LauncherActivity.this, which).isEmpty()) return false;
+                    if (event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+                        stepVersion(which, keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : -1);
+                    }
+                    return true;
                 }
             });
             row.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -208,10 +249,12 @@ public final class LauncherActivity extends Activity {
             description.setText(R.string.launcher_no_core);
         } else if (!hasRom) {
             description.setText(R.string.launcher_no_rom);
+        } else if (!Games.version(this, which).isEmpty()) {
+            description.setText(getString(R.string.launcher_hack_description, Games.versionName(this, which)));
         } else {
             description.setText(R.string.launcher_ready_description);
         }
-        boolean ready = hasCore && hasRom;
+        boolean ready = Games.ready(this, which);
         play.setVisibility(ready ? View.VISIBLE : View.GONE);
         boolean anyRom = false;
         for (int g = 1; g <= Games.COUNT; g++) anyRom |= Games.hasRom(this, g);
@@ -296,6 +339,7 @@ public final class LauncherActivity extends Activity {
             @Override public void run() {
                 String message;
                 int found = 0;
+                List<GameFiles.PendingIps> pendingIps = new ArrayList<>();
                 try {
                     GameFiles.Scan scan = GameFiles.importFrom(LauncherActivity.this, tree, new GameFiles.Progress() {
                         @Override public void update(final float fraction) {
@@ -310,8 +354,10 @@ public final class LauncherActivity extends Activity {
                             scan.roms[g] &= !had[g];
                             scan.cores[g] = false;
                         }
-                        scan.unknownRoms = scan.badCores = 0;
+                        scan.unknownRoms = scan.badCores = scan.badPatches = 0;
+                        scan.hacks.clear();
                     }
+                    pendingIps = scan.pendingIps;
                     message = chosen || scan.any() ? describe(scan) : "";
                     for (int g = 1; g <= Games.COUNT; g++) if (scan.roms[g] || scan.cores[g]) { found = g; break; }
                 } catch (IOException | RuntimeException exception) {
@@ -322,6 +368,7 @@ public final class LauncherActivity extends Activity {
                 }
                 final String result = message;
                 final int first = found;
+                final List<GameFiles.PendingIps> pending = pendingIps;
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
                         if (isFinishing() || isDestroyed()) return;
@@ -331,6 +378,12 @@ public final class LauncherActivity extends Activity {
                         // Never start on its own after choosing a folder; Play does.
                         int show = !Games.hasRom(LauncherActivity.this, game) && first > 0 ? first : game;
                         Games.select(LauncherActivity.this, show);
+                        if (!pending.isEmpty()) {
+                            autoStartAllowed = false;
+                            showGame(show, false);
+                            askIps(pending, 0);
+                            return;
+                        }
                         showGame(show, !chosen && autoStartAllowed);
                         autoStartAllowed = false;
                     }
@@ -345,10 +398,60 @@ public final class LauncherActivity extends Activity {
             if (scan.roms[g]) lines.add(getString(R.string.launcher_found_rom, getString(Games.TITLES[g - 1])));
             if (scan.cores[g]) lines.add(getString(R.string.launcher_found_core, getString(Games.TITLES[g - 1])));
         }
+        for (String hack : scan.hacks) {
+            String[] parts = hack.split("\t", 2);
+            lines.add(getString(R.string.launcher_found_hack, getString(Games.TITLES[Integer.parseInt(parts[0]) - 1]), parts[1]));
+        }
+        if (scan.badPatches > 0) lines.add(getString(R.string.launcher_bad_patches, scan.badPatches));
         if (scan.unknownRoms > 0) lines.add(getString(R.string.launcher_unknown_roms, scan.unknownRoms));
         if (scan.badCores > 0) lines.add(getString(R.string.launcher_bad_cores, scan.badCores));
         if (lines.isEmpty()) return getString(R.string.launcher_nothing_found);
         return String.join("\n", lines);
+    }
+
+    /** IPS patches do not say which ROM they are for: one question each, with the likeliest game marked. */
+    private void askIps(final List<GameFiles.PendingIps> pending, final int index) {
+        if (isFinishing() || isDestroyed()) return;
+        if (index >= pending.size()) {
+            showGame(game, false);
+            return;
+        }
+        final GameFiles.PendingIps patch = pending.get(index);
+        String[] choices = new String[Games.COUNT + 1];
+        for (int g = 1; g <= Games.COUNT; g++) choices[g - 1] = getString(Games.TITLES[g - 1]);
+        choices[Games.COUNT] = getString(R.string.launcher_ips_none);
+        final int[] chosen = {patch.suggestedGame - 1};
+        new android.app.AlertDialog.Builder(this)
+            .setTitle(getString(R.string.launcher_ips_title, patch.name))
+            .setSingleChoiceItems(choices, chosen[0], (dialog, which) -> chosen[0] = which)
+            .setPositiveButton(R.string.launcher_ips_ok, (dialog, which) -> {
+                final int target = chosen[0] < Games.COUNT ? chosen[0] + 1 : 0;
+                worker.execute(new Runnable() {
+                    @Override public void run() {
+                        boolean ok;
+                        try {
+                            ok = GameFiles.assignIps(LauncherActivity.this, patch, target);
+                        } catch (IOException | RuntimeException exception) {
+                            Log.w("Monoloco", "IPS patch " + patch.name, exception);
+                            ok = false;
+                        }
+                        final boolean installed = ok;
+                        runOnUiThread(new Runnable() {
+                            @Override public void run() {
+                                if (target > 0) {
+                                    String line = installed
+                                        ? getString(R.string.launcher_found_hack, getString(Games.TITLES[target - 1]), patch.name)
+                                        : getString(R.string.launcher_ips_failed, patch.name);
+                                    importMessage = importMessage.isEmpty() ? line : importMessage + "\n" + line;
+                                }
+                                askIps(pending, index + 1);
+                            }
+                        });
+                    }
+                });
+            })
+            .setCancelable(false)
+            .show();
     }
 
     private void startGame() {
