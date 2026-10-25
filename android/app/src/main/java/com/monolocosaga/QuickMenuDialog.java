@@ -550,12 +550,22 @@ final class QuickMenuDialog {
     }
 
     private void addScreenRows() {
-        addChoice(R.string.quick_format, R.string.quick_format_tip,
-            setting(LauncherSettings.FORMAT, 0, R.array.quick_formats));
+        final Choice format = setting(LauncherSettings.FORMAT, 0, R.array.quick_formats);
+        final View[] pixels = new View[1];
+        addChoice(R.string.quick_format, R.string.quick_format_tip, new Choice() {
+            @Override public String[] values() { return format.values(); }
+            @Override public int get() { return format.get(); }
+            @Override public void set(int value) {
+                format.set(value);
+                // 8:7 always uses square pixels.
+                setRowEnabled(pixels[0], value != LauncherSettings.FORMAT_8_7);
+            }
+        });
         addChoice(R.string.quick_scale, R.string.quick_scale_tip,
             setting(LauncherSettings.SCALE, LauncherSettings.DEFAULT_SCALE, R.array.quick_scales));
-        addChoice(R.string.quick_pixels, R.string.quick_pixels_tip,
+        pixels[0] = addChoice(R.string.quick_pixels, R.string.quick_pixels_tip,
             setting(LauncherSettings.SQUARE_PIXELS, LauncherSettings.DEFAULT_SQUARE_PIXELS, R.array.quick_pixel_shapes));
+        setRowEnabled(pixels[0], format.get() != LauncherSettings.FORMAT_8_7);
         addChoice(R.string.quick_fps, 0, new Choice() {
             @Override public String[] values() { return array(R.array.quick_off_on); }
             @Override public int get() { return activity.fpsOverlayVisible() ? 1 : 0; }

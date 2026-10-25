@@ -89,10 +89,11 @@
     <string name="quick_restart_confirm">Restart? Anything unsaved will be lost.</string>
 
     <string name="quick_format">Picture format</string>
-    <string name="quick_format_tip">Automatic picks the widescreen that best fits your screen. Widescreen formats show more of the level.</string>
+    <string name="quick_format_tip">Automatic picks the widescreen that best fits your screen. Widescreen formats show more of the level. 8:7 is the console\'s picture as it is (256×224) with square pixels, not stretched to 4:3.</string>
     <string-array name="quick_formats">
         <item>Automatic</item>
         <item>Original 4:3</item>
+        <item>Original 8:7</item>
         <item>Widescreen 16:10</item>
         <item>Widescreen 16:9</item>
     </string-array>
@@ -104,7 +105,7 @@
         <item>Full screen</item>
     </string-array>
     <string name="quick_pixels">Pixel shape</string>
-    <string name="quick_pixels_tip">Original: the console\'s proportions on a television.</string>
+    <string name="quick_pixels_tip">Original: the console\'s proportions on a television (4:3). Square: every pixel as wide as it is tall. 8:7 always uses square pixels.</string>
     <string-array name="quick_pixel_shapes">
         <item>Original</item>
         <item>Square</item>

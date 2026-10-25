@@ -13,6 +13,8 @@ final class LauncherSettings {
     static final int DEFAULT_FILTER = 2, DEFAULT_SCALE = 2, DEFAULT_SQUARE_PIXELS = 1;
     /** Size: fit, integer or full screen (native kScale order). */
     static final int SCALE_FIT = 0, SCALE_FULL_SCREEN = 2;
+    /** Format: automatic, original 4:3, 8:7 (the 256x224 picture with square pixels), 16:10, 16:9. */
+    static final int FORMAT_8_7 = 2;
     /** Effects only apply to the plain filters: nearest, linear and sharp bilinear. */
     static final int LAST_PLAIN_FILTER = 2, FILTER_HD = 3, FILTER_FSR = 5, EFFECT_CRT_HYLLIAN = 3;
     private static final String VERSION = "settings_version";
@@ -26,27 +28,32 @@ final class LauncherSettings {
     @SuppressWarnings("deprecation")
     static SharedPreferences prefs(Context context) {
         SharedPreferences prefs = context.getSharedPreferences("game", Context.MODE_MULTI_PROCESS);
-        if (prefs.getInt(VERSION, 1) < 3) migrate(prefs);
+        if (prefs.getInt(VERSION, 1) < 4) migrate(prefs);
         return prefs;
     }
 
     /**
      * Version 2 dropped the CRT Lottes filter (5) and made CRT Hyllian (6) an effect. Version 3
-     * dropped Anime4K GAN (8) and swapped Anime4K M (6, now Full) and 3D (7, now Light).
+     * dropped Anime4K GAN (8) and swapped Anime4K M (6, now Full) and 3D (7, now Light). Version 4
+     * put the 8:7 format (2) after the original 4:3 one.
      */
     private static void migrate(SharedPreferences prefs) {
         int version = prefs.getInt(VERSION, 1);
         int filter = prefs.getInt(FILTER, DEFAULT_FILTER);
-        SharedPreferences.Editor editor = prefs.edit().putInt(VERSION, 3);
+        SharedPreferences.Editor editor = prefs.edit().putInt(VERSION, 4);
         if (version < 2) {
             if (filter == 5 || filter == 6) filter = DEFAULT_FILTER;
             if (prefs.getInt(FILTER, DEFAULT_FILTER) == 6) editor.putInt(EFFECT, EFFECT_CRT_HYLLIAN);
             if (filter > 6) filter -= 2;
         }
-        if (filter == 6) filter = 7;
-        else if (filter == 7) filter = 6;
-        else if (filter == 8) filter = 7;
-        if (prefs.contains(FILTER)) editor.putInt(FILTER, filter);
+        if (version < 3) {
+            if (filter == 6) filter = 7;
+            else if (filter == 7) filter = 6;
+            else if (filter == 8) filter = 7;
+            if (prefs.contains(FILTER)) editor.putInt(FILTER, filter);
+        }
+        int format = prefs.getInt(FORMAT, 0);
+        if (format >= FORMAT_8_7) editor.putInt(FORMAT, format + 1);
         editor.apply();
     }
 
@@ -63,9 +70,9 @@ final class LauncherSettings {
     /** The core's aspect (0 4:3, 1 16:10, 2 16:9) for the format setting on this screen. */
     static int aspect(android.app.Activity activity) {
         int format = get(activity, FORMAT, 0);
-        if (format == 1) return 0;
-        if (format == 2) return 1;
-        if (format == 3) return 2;
+        if (format == 1 || format == FORMAT_8_7) return 0;
+        if (format == 3) return 1;
+        if (format == 4) return 2;
         android.graphics.Rect bounds = activity.getWindowManager().getMaximumWindowMetrics().getBounds();
         float ratio = (float) Math.max(bounds.width(), bounds.height())
             / Math.max(1, Math.min(bounds.width(), bounds.height()));
@@ -81,8 +88,11 @@ final class LauncherSettings {
             int scale = get(activity, SCALE, DEFAULT_SCALE);
             // Full screen stretches the widescreen pictures to the edges; a 4:3 one keeps its shape.
             if (scale == SCALE_FULL_SCREEN && aspect == 0) scale = SCALE_FIT;
+            // 8:7 is the console's own 256x224 picture: square pixels whatever the setting.
+            boolean square = get(activity, FORMAT, 0) == FORMAT_8_7
+                || get(activity, SQUARE_PIXELS, DEFAULT_SQUARE_PIXELS) == 1;
             GameBridge.nativeSetVideo(get(activity, FILTER, DEFAULT_FILTER), get(activity, EFFECT, 0),
-                scale, get(activity, SQUARE_PIXELS, DEFAULT_SQUARE_PIXELS) == 0);
+                scale, !square);
             GameBridge.nativeSetAspect(aspect);
             GameBridge.nativeSetVolume(get(activity, VOLUME, 100));
             GameBridge.nativeSetHdLevel(get(activity, HD_LEVEL, 1));
