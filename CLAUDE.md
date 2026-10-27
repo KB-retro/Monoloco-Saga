@@ -48,7 +48,7 @@ Repo: https://github.com/KB-retro/Monoloco-Saga. No fusionar cambios de upstream
   parcheadas de 4 MB (por el título de la cabecera) en `gameN/hacks/<id>/` con su `rom.sfc`,
   `name.txt` y partidas propias. El frontend recibe `modified` y el núcleo acepta cualquier ROM de
   4 MB (`MONOLOCO_MODIFIED_ROM`); el código sigue siendo el de la ROM original.
-  Una ROM de otra revisión (mismo título, otro byte de revisión en 0xFFDB) se guarda en
+  Una ROM de otra revisión o región (mismo título, otro byte de revisión 0xFFDB o país 0xFFD9) se guarda en
   `gameN/revisions/`; sus parches se aplican sobre ella y `RevisionPort` traslada cada cambio a la
   1.0 buscando los mismos bytes originales con su contexto.
 - Entrada del mando empaquetada como en los originales: B=0 Y=1 Select=2 Start=3 Arriba=4 Abajo=5

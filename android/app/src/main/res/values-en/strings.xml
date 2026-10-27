@@ -26,8 +26,8 @@
     <string name="launcher_unknown_roms">Unrecognised 4 MB files: %1$d (another region or revision?)</string>
     <string name="launcher_bad_cores">Invalid cores: %1$d</string>
     <string name="launcher_found_hack">✓ %1$s hack: %2$s</string>
-    <string name="launcher_found_hack_moved">✓ %1$s hack: %2$s (moved from revision 1.%3$s: %4$d%% of the changes)</string>
-    <string name="launcher_found_revision">✓ %1$s revision 1.%2$s ROM: used to move its hacks to 1.0</string>
+    <string name="launcher_found_hack_moved">✓ %1$s hack: %2$s (moved from version %3$s: %4$d%% of the changes; whatever changes the game code will not work)</string>
+    <string name="launcher_found_revision">✓ %1$s %2$s ROM: used to move its hacks to your version</string>
     <string name="launcher_bad_patches">Patches that do not fit your USA ROMs, are damaged or expand the ROM: %1$d</string>
     <string name="launcher_version">‹ Version: %1$s ›</string>
     <string name="launcher_version_original">Original</string>

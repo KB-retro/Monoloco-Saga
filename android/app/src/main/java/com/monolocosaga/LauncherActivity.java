@@ -461,7 +461,8 @@ public final class LauncherActivity extends Activity {
         String[] parts = hack.split("\t", 3);
         String title = getString(Games.TITLES[Integer.parseInt(parts[0]) - 1]);
         if (parts.length < 3 || parts[2].isEmpty()) return getString(R.string.launcher_found_hack, title, parts[1]);
-        String[] moved = parts[2].split(":", 2);
+        int colon = parts[2].lastIndexOf(':');
+        String[] moved = {parts[2].substring(0, colon), parts[2].substring(colon + 1)};
         return getString(R.string.launcher_found_hack_moved, title, parts[1], moved[0], Integer.parseInt(moved[1]));
     }
 

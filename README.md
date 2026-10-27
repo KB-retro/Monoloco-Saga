@@ -26,8 +26,9 @@ y RG477M.
   lanzador eliges la versión con izquierda/derecha. Cada versión tiene sus propias partidas.
   Funcionan los hacks que solo cambian datos (niveles, gráficos, textos) y de 4 MB; los que
   cambian el código o amplían la ROM, no. Si añades hacks después, vuelve a elegir la carpeta.
-  Para un parche hecho para otra revisión del juego (por ejemplo la 1.2), pon también esa ROM
-  original en la carpeta: la app aplica el parche sobre ella y traslada los cambios a la 1.0.
+  Para un parche hecho para otra revisión o región del juego (por ejemplo la 1.2 o la PAL), pon
+  también esa ROM original en la carpeta: la app aplica el parche sobre ella y traslada los
+  cambios a la 1.0 USA. Lo que el parche cambie en el código del juego no funcionará.
 - **Menú rápido** con el botón Atrás: pausa el juego. Incluye imagen (formato, filtro, efecto,
   proporción de píxel; filtros Nítido, Suave, Nítido suavizado, HD, xBR, FSR y los
   reescaladores neuronales Anime4K Light, Full y Ultra, con limpieza opcional Anime4K Restore; efectos Líneas, CRT y CRT Hyllian), sonido,

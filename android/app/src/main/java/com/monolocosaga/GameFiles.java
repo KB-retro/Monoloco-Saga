@@ -22,9 +22,9 @@ import java.util.Locale;
  * names (a 512-byte copier header is dropped), cores built on a PC (libmonoloco_gameN.so) and ROM
  * hacks of the three: ROMs already patched (same size, the game told by the title in their
  * header), BPS patches (they name the ROM they are for) and IPS patches (the player confirms the
- * game the first time; see {@link PendingIps}). A ROM of another revision of a game (same title,
- * another revision byte) is kept in {@code game<n>/revisions/}: hacks made for it are applied to it
- * and then moved onto our revision ({@link RevisionPort}). The folder and one level of subfolders
+ * game the first time; see {@link PendingIps}). A ROM of another revision or region of a game
+ * (same title, another revision or country byte) is kept in {@code game<n>/revisions/}: hacks made
+ * for it are applied to it and then moved onto ours ({@link RevisionPort}). The folder and one level of subfolders
  * are searched.
  */
 final class GameFiles {
@@ -43,9 +43,9 @@ final class GameFiles {
     static final class Scan {
         final boolean[] roms = new boolean[Games.COUNT + 1];
         final boolean[] cores = new boolean[Games.COUNT + 1];
-        /** "game\tname\tnote" of each hack installed; note is "" or "revision:percent" when moved. */
+        /** "game\tname\tnote" of each hack installed; note is "" or "label:percent" when moved. */
         final List<String> hacks = new ArrayList<>();
-        /** "game\trevision" of each other revision kept. */
+        /** "game\tlabel" of each other revision or region kept (see versionLabel). */
         final List<String> revisions = new ArrayList<>();
         /** IPS patches the player has not assigned to a game yet. */
         final List<PendingIps> pendingIps = new ArrayList<>();
@@ -114,13 +114,14 @@ final class GameFiles {
         for (int i = 0; i < modified.size(); i++) {
             File rom = modified.get(i);
             int game = retail.gameWithTitle(readTitle(rom));
-            if (game > 0 && readByte(rom, REVISION) != retail.rom(game)[REVISION]) {
-                // Another revision: kept to bring its hacks over.
-                int revision = readByte(rom, REVISION) & 255;
+            if (game > 0 && (readByte(rom, REVISION) != retail.rom(game)[REVISION]
+                    || readByte(rom, COUNTRY) != retail.rom(game)[COUNTRY])) {
+                // Another revision or region: kept to bring its hacks over.
+                byte[] data = readFile(rom);
                 File folder = new File(Games.dir(context, game), "revisions");
                 if (!folder.isDirectory() && !folder.mkdirs()) throw new IOException("Cannot create " + folder);
-                install(rom, new File(folder, Long.toHexString(RomPatch.crc32(readFile(rom))) + ".sfc"));
-                scan.revisions.add(game + "\t" + revision);
+                install(rom, new File(folder, Long.toHexString(RomPatch.crc32(data)) + ".sfc"));
+                scan.revisions.add(game + "\t" + versionLabel(data));
             } else if (game > 0) {
                 installHack(context, game, modifiedNames.get(i), rom);
                 scan.hacks.add(game + "\t" + modifiedNames.get(i) + "\t");
@@ -211,7 +212,7 @@ final class GameFiles {
         RevisionPort.Result moved = RevisionPort.port(base, patched, ours);
         if (moved == null || moved.placed == 0) return null;
         applied.rom = moved.rom;
-        applied.note = RevisionPort.revision(base) + ":" + moved.percent();
+        applied.note = versionLabel(base) + ":" + moved.percent();
         return applied;
     }
 
@@ -352,8 +353,15 @@ final class GameFiles {
         return base.trim().isEmpty() ? name : base.trim();
     }
 
-    /** The revision byte in the internal header. */
-    private static final int REVISION = 0xFFDB;
+    /** The country and revision bytes in the internal header. */
+    private static final int COUNTRY = 0xFFD9, REVISION = 0xFFDB;
+
+    /** "USA 1.2", "PAL 1.0", "JPN 1.1": which release a ROM is. */
+    static String versionLabel(byte[] rom) {
+        int country = rom.length > COUNTRY ? rom[COUNTRY] & 255 : 1;
+        String region = country == 0 ? "JPN" : country == 1 ? "USA" : "PAL";
+        return region + " 1." + Math.max(0, RevisionPort.revision(rom));
+    }
 
     private static byte readByte(File rom, int offset) throws IOException {
         try (java.io.RandomAccessFile file = new java.io.RandomAccessFile(rom, "r")) {
