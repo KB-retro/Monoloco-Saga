@@ -30,6 +30,8 @@
     <string name="launcher_unknown_roms">Archivos de 4 MB no reconocidos: %1$d (¿otra región o versión?)</string>
     <string name="launcher_bad_cores">Núcleos no válidos: %1$d</string>
     <string name="launcher_found_hack">✓ Hack de %1$s: %2$s</string>
+    <string name="launcher_found_hack_moved">✓ Hack de %1$s: %2$s (convertido desde la revisión 1.%3$s: %4$d %% de los cambios)</string>
+    <string name="launcher_found_revision">✓ ROM de %1$s revisión 1.%2$s: se usará para convertir sus hacks a la 1.0</string>
     <string name="launcher_bad_patches">Parches que no encajan con tus ROM USA, dañados o que amplían la ROM: %1$d</string>
     <string name="launcher_version">‹ Versión: %1$s ›</string>
     <string name="launcher_version_original">Original</string>

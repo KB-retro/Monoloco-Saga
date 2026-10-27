@@ -356,6 +356,7 @@ public final class LauncherActivity extends Activity {
                         }
                         scan.unknownRoms = scan.badCores = scan.badPatches = 0;
                         scan.hacks.clear();
+                        scan.revisions.clear();
                     }
                     pendingIps = scan.pendingIps;
                     message = chosen || scan.any() ? describe(scan) : "";
@@ -398,10 +399,11 @@ public final class LauncherActivity extends Activity {
             if (scan.roms[g]) lines.add(getString(R.string.launcher_found_rom, getString(Games.TITLES[g - 1])));
             if (scan.cores[g]) lines.add(getString(R.string.launcher_found_core, getString(Games.TITLES[g - 1])));
         }
-        for (String hack : scan.hacks) {
-            String[] parts = hack.split("\t", 2);
-            lines.add(getString(R.string.launcher_found_hack, getString(Games.TITLES[Integer.parseInt(parts[0]) - 1]), parts[1]));
+        for (String revision : scan.revisions) {
+            String[] parts = revision.split("\t", 2);
+            lines.add(getString(R.string.launcher_found_revision, getString(Games.TITLES[Integer.parseInt(parts[0]) - 1]), parts[1]));
         }
+        for (String hack : scan.hacks) lines.add(describeHack(hack));
         if (scan.badPatches > 0) lines.add(getString(R.string.launcher_bad_patches, scan.badPatches));
         if (scan.unknownRoms > 0) lines.add(getString(R.string.launcher_unknown_roms, scan.unknownRoms));
         if (scan.badCores > 0) lines.add(getString(R.string.launcher_bad_cores, scan.badCores));
@@ -428,19 +430,19 @@ public final class LauncherActivity extends Activity {
                 final int target = chosen[0] < Games.COUNT ? chosen[0] + 1 : 0;
                 worker.execute(new Runnable() {
                     @Override public void run() {
-                        boolean ok;
+                        String note;
                         try {
-                            ok = GameFiles.assignIps(LauncherActivity.this, patch, target);
+                            note = GameFiles.assignIps(LauncherActivity.this, patch, target);
                         } catch (IOException | RuntimeException exception) {
                             Log.w("Monoloco", "IPS patch " + patch.name, exception);
-                            ok = false;
+                            note = null;
                         }
-                        final boolean installed = ok;
+                        final String installed = note;
                         runOnUiThread(new Runnable() {
                             @Override public void run() {
                                 if (target > 0) {
-                                    String line = installed
-                                        ? getString(R.string.launcher_found_hack, getString(Games.TITLES[target - 1]), patch.name)
+                                    String line = installed != null
+                                        ? describeHack(target + "\t" + patch.name + "\t" + installed)
                                         : getString(R.string.launcher_ips_failed, patch.name);
                                     importMessage = importMessage.isEmpty() ? line : importMessage + "\n" + line;
                                 }
@@ -452,6 +454,15 @@ public final class LauncherActivity extends Activity {
             })
             .setCancelable(false)
             .show();
+    }
+
+    /** One line for a hack installed: "game\tname\tnote" (see GameFiles.Scan.hacks). */
+    private String describeHack(String hack) {
+        String[] parts = hack.split("\t", 3);
+        String title = getString(Games.TITLES[Integer.parseInt(parts[0]) - 1]);
+        if (parts.length < 3 || parts[2].isEmpty()) return getString(R.string.launcher_found_hack, title, parts[1]);
+        String[] moved = parts[2].split(":", 2);
+        return getString(R.string.launcher_found_hack_moved, title, parts[1], moved[0], Integer.parseInt(moved[1]));
     }
 
     private void startGame() {

@@ -22,7 +22,10 @@ import java.util.Locale;
  * names (a 512-byte copier header is dropped), cores built on a PC (libmonoloco_gameN.so) and ROM
  * hacks of the three: ROMs already patched (same size, the game told by the title in their
  * header), BPS patches (they name the ROM they are for) and IPS patches (the player confirms the
- * game the first time; see {@link PendingIps}). The folder and one level of subfolders are searched.
+ * game the first time; see {@link PendingIps}). A ROM of another revision of a game (same title,
+ * another revision byte) is kept in {@code game<n>/revisions/}: hacks made for it are applied to it
+ * and then moved onto our revision ({@link RevisionPort}). The folder and one level of subfolders
+ * are searched.
  */
 final class GameFiles {
     private static final int HEADER = 512;
@@ -40,8 +43,10 @@ final class GameFiles {
     static final class Scan {
         final boolean[] roms = new boolean[Games.COUNT + 1];
         final boolean[] cores = new boolean[Games.COUNT + 1];
-        /** "game\tname" of each hack installed. */
+        /** "game\tname\tnote" of each hack installed; note is "" or "revision:percent" when moved. */
         final List<String> hacks = new ArrayList<>();
+        /** "game\trevision" of each other revision kept. */
+        final List<String> revisions = new ArrayList<>();
         /** IPS patches the player has not assigned to a game yet. */
         final List<PendingIps> pendingIps = new ArrayList<>();
         int unknownRoms;
@@ -51,7 +56,7 @@ final class GameFiles {
 
         boolean any() {
             for (int i = 1; i <= Games.COUNT; i++) if (roms[i] || cores[i]) return true;
-            return !hacks.isEmpty() || !pendingIps.isEmpty();
+            return !hacks.isEmpty() || !pendingIps.isEmpty() || !revisions.isEmpty();
         }
     }
 
@@ -109,9 +114,16 @@ final class GameFiles {
         for (int i = 0; i < modified.size(); i++) {
             File rom = modified.get(i);
             int game = retail.gameWithTitle(readTitle(rom));
-            if (game > 0) {
+            if (game > 0 && readByte(rom, REVISION) != retail.rom(game)[REVISION]) {
+                // Another revision: kept to bring its hacks over.
+                int revision = readByte(rom, REVISION) & 255;
+                File folder = new File(Games.dir(context, game), "revisions");
+                if (!folder.isDirectory() && !folder.mkdirs()) throw new IOException("Cannot create " + folder);
+                install(rom, new File(folder, Long.toHexString(RomPatch.crc32(readFile(rom))) + ".sfc"));
+                scan.revisions.add(game + "\t" + revision);
+            } else if (game > 0) {
                 installHack(context, game, modifiedNames.get(i), rom);
-                scan.hacks.add(game + "\t" + modifiedNames.get(i));
+                scan.hacks.add(game + "\t" + modifiedNames.get(i) + "\t");
             } else {
                 rom.delete();
                 scan.unknownRoms++;
@@ -124,16 +136,24 @@ final class GameFiles {
             progress.update(total > 0 ? Math.min(1f, (float) done[0] / total) : 1);
             String name = baseName(candidate.name);
             if (RomPatch.isBps(patch)) {
-                int game = retail.gameWithCrc(RomPatch.bpsSourceCrc(patch));
-                byte[] rom = null;
-                try {
-                    if (game > 0) rom = RomPatch.applyBps(retail.rom(game), patch);
-                } catch (IOException exception) {
-                    android.util.Log.w("Monoloco", "BPS patch " + candidate.name, exception);
+                long source = RomPatch.bpsSourceCrc(patch);
+                Applied applied = null;
+                int game = 0;
+                for (int g = 1; g <= Games.COUNT && applied == null; g++) {
+                    for (byte[] base : retail.bases(g)) {
+                        if (RomPatch.crc32(base) != source) continue;
+                        try {
+                            applied = onRetail(retail, g, base, RomPatch.applyBps(base, patch));
+                        } catch (IOException exception) {
+                            android.util.Log.w("Monoloco", "BPS patch " + candidate.name, exception);
+                        }
+                        game = g;
+                        break;
+                    }
                 }
-                if (rom != null && rom.length == Games.ROM_SIZE) {
-                    installHack(context, game, name, rom);
-                    scan.hacks.add(game + "\t" + name);
+                if (applied != null) {
+                    installHack(context, game, name, applied.rom);
+                    scan.hacks.add(game + "\t" + name + "\t" + applied.note);
                 } else {
                     scan.badPatches++;
                 }
@@ -142,11 +162,9 @@ final class GameFiles {
                 int answer = prefs.getInt(ipsKey(crc), -1);
                 if (answer == 0) continue;  // the player said it is for none of them
                 if (answer > 0) {
-                    if (retail.has(answer) && installIps(context, retail, answer, name, patch)) {
-                        scan.hacks.add(answer + "\t" + name);
-                    } else {
-                        scan.badPatches++;
-                    }
+                    String note = retail.has(answer) ? installIps(context, retail, answer, name, patch) : null;
+                    if (note != null) scan.hacks.add(answer + "\t" + name + "\t" + note);
+                    else scan.badPatches++;
                     continue;
                 }
                 PendingIps pending = new PendingIps();
@@ -164,12 +182,37 @@ final class GameFiles {
         return scan;
     }
 
-    /** Applies an IPS patch the player assigned to a game; remembers the answer (0: none). */
-    static boolean assignIps(Context context, PendingIps pending, int game) throws IOException {
+    /**
+     * Applies an IPS patch the player assigned to a game and remembers the answer (0: none).
+     * Returns the hack's note (see {@link Scan#hacks}), "" for none, or null when it did not fit.
+     */
+    static String assignIps(Context context, PendingIps pending, int game) throws IOException {
         LauncherSettings.prefs(context).edit().putInt(ipsKey(pending.crc), game).apply();
-        if (game <= 0) return true;
+        if (game <= 0) return "";
         Retail retail = new Retail(context);
-        return retail.has(game) && installIps(context, retail, game, pending.name, pending.patch);
+        return retail.has(game) ? installIps(context, retail, game, pending.name, pending.patch) : null;
+    }
+
+    /** A hack's ROM on our revision, and a note when it was moved from another one. */
+    private static final class Applied {
+        byte[] rom;
+        String note = "";
+    }
+
+    /** patched is base with the hack; moved onto our ROM when base is another revision. */
+    private static Applied onRetail(Retail retail, int game, byte[] base, byte[] patched) throws IOException {
+        if (patched == null || patched.length != Games.ROM_SIZE) return null;  // expanded: needs code we lack
+        Applied applied = new Applied();
+        byte[] ours = retail.rom(game);
+        if (base == ours) {
+            applied.rom = patched;
+            return applied;
+        }
+        RevisionPort.Result moved = RevisionPort.port(base, patched, ours);
+        if (moved == null || moved.placed == 0) return null;
+        applied.rom = moved.rom;
+        applied.note = RevisionPort.revision(base) + ":" + moved.percent();
+        return applied;
     }
 
     /**
@@ -181,53 +224,89 @@ final class GameFiles {
         double bestScore = -1;
         for (int game = 1; game <= Games.COUNT; game++) {
             if (!retail.has(game)) continue;
-            for (int shift : new int[] {0, RomPatch.HEADER}) {
-                double likeness = RomPatch.ipsLikeness(retail.rom(game), patch, shift);
-                if (likeness < 0) continue;
-                double score = likeness;
-                try {
-                    byte[] patched = RomPatch.applyIps(retail.rom(game), patch, shift);
-                    if (patched.length != Games.ROM_SIZE) continue;
-                    if (RomPatch.checksumValid(patched)) score += 10;
-                } catch (IOException exception) {
-                    continue;
-                }
-                if (score > bestScore) {
-                    bestScore = score;
-                    best = game;
+            for (byte[] base : retail.bases(game)) {
+                for (int shift : new int[] {0, RomPatch.HEADER}) {
+                    double score = ipsScore(base, patch, shift);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = game;
+                    }
                 }
             }
         }
         return best;
     }
 
+    /** How well an IPS patch fits a ROM (see suggestGame); -1 when it does not apply. */
+    private static double ipsScore(byte[] base, byte[] patch, int shift) {
+        double likeness = RomPatch.ipsLikeness(base, patch, shift);
+        if (likeness < 0) return -1;
+        try {
+            byte[] patched = RomPatch.applyIps(base, patch, shift);
+            if (patched.length != Games.ROM_SIZE) return -1;
+            return likeness + (RomPatch.checksumValid(patched) ? 10 : 0);
+        } catch (IOException exception) {
+            return -1;
+        }
+    }
+
     private static String ipsKey(long crc) { return "ips_" + Long.toHexString(crc); }
 
-    /** With or without the copier header the patch may count, whichever fits the ROM better. */
-    private static boolean installIps(Context context, Retail retail, int game, String name, byte[] patch)
+    /**
+     * On whichever revision of the game (ours or one kept) and with or without the copier header
+     * the patch counts it fits best; moved onto ours when needed. Returns the hack's note, or null.
+     */
+    private static String installIps(Context context, Retail retail, int game, String name, byte[] patch)
             throws IOException {
-        byte[] source = retail.rom(game);
-        int shift = RomPatch.ipsLikeness(source, patch, RomPatch.HEADER) > RomPatch.ipsLikeness(source, patch, 0)
-            ? RomPatch.HEADER : 0;
-        byte[] rom;
+        byte[] best = null;
+        int bestShift = 0;
+        double bestScore = -1;
+        for (byte[] base : retail.bases(game)) {
+            for (int shift : new int[] {0, RomPatch.HEADER}) {
+                double score = ipsScore(base, patch, shift);
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = base;
+                    bestShift = shift;
+                }
+            }
+        }
+        if (best == null) return null;
+        Applied applied;
         try {
-            rom = RomPatch.applyIps(source, patch, shift);
+            applied = onRetail(retail, game, best, RomPatch.applyIps(best, patch, bestShift));
         } catch (IOException exception) {
             android.util.Log.w("Monoloco", "IPS patch " + name, exception);
-            return false;
+            return null;
         }
-        if (rom.length != Games.ROM_SIZE) return false;  // expanded ROMs need code the cores lack
-        installHack(context, game, name, rom);
-        return true;
+        if (applied == null) return null;
+        installHack(context, game, name, applied.rom);
+        return applied.note;
     }
 
     /** The verified ROMs, read when a hack needs them. */
     private static final class Retail {
         private final Context context;
         private final byte[][] roms = new byte[Games.COUNT + 1][];
-        private final long[] crcs = new long[Games.COUNT + 1];
 
-        Retail(Context context) { this.context = context; }
+        private final List<List<byte[]>> bases = new ArrayList<>();
+
+        Retail(Context context) {
+            this.context = context;
+            for (int game = 0; game <= Games.COUNT; game++) bases.add(null);
+        }
+
+        /** Our ROM first, then the other revisions kept for the game. */
+        List<byte[]> bases(int game) throws IOException {
+            if (bases.get(game) == null) {
+                List<byte[]> list = new ArrayList<>();
+                if (has(game)) list.add(rom(game));
+                File[] kept = new File(Games.dir(context, game), "revisions").listFiles();
+                if (kept != null) for (File file : kept) if (file.length() == Games.ROM_SIZE) list.add(readFile(file));
+                bases.set(game, list);
+            }
+            return bases.get(game);
+        }
 
         boolean has(int game) { return Games.hasRom(context, game); }
 
@@ -240,15 +319,6 @@ final class GameFiles {
             if (title == null) return 0;
             for (int game = 1; game <= Games.COUNT; game++) {
                 if (has(game) && java.util.Arrays.equals(title, readTitle(Games.rom(context, game)))) return game;
-            }
-            return 0;
-        }
-
-        int gameWithCrc(long crc) throws IOException {
-            for (int game = 1; game <= Games.COUNT; game++) {
-                if (!has(game)) continue;
-                if (crcs[game] == 0) crcs[game] = RomPatch.crc32(rom(game));
-                if (crcs[game] == crc) return game;
             }
             return 0;
         }
@@ -280,6 +350,16 @@ final class GameFiles {
         int dot = name.lastIndexOf('.');
         String base = dot > 0 ? name.substring(0, dot) : name;
         return base.trim().isEmpty() ? name : base.trim();
+    }
+
+    /** The revision byte in the internal header. */
+    private static final int REVISION = 0xFFDB;
+
+    private static byte readByte(File rom, int offset) throws IOException {
+        try (java.io.RandomAccessFile file = new java.io.RandomAccessFile(rom, "r")) {
+            file.seek(offset);
+            return file.readByte();
+        }
     }
 
     private static byte[] readTitle(File rom) throws IOException {
