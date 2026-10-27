@@ -101,6 +101,43 @@ jobs:
           [ "$found" -gt 0 ] || { echo "::error::None of the downloaded files is a supported ROM (USA v1.0)."; exit 1; }
           grep '^monoloco.rom' local.properties | sed 's/=.*//' | while read -r key; do echo "::notice::Included: $key"; done
 
+      - name: Your private artwork (optional, hand-run builds only)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ART: ${{ secrets.MONOLOCO_ART_URL }}
+        run: |
+          # A private .zip (or folder link) whose res/ replaces the app's icons, game badges and
+          # launcher backdrop in this build only; it is never committed.
+          if [ -z "$ART" ]; then exit 0; fi
+          url="$ART"
+          case "$url" in
+            *dropbox.com*) url="${url//dl=0/dl=1}"; [[ "$url" == *dl=1* ]] || url="$url$([[ "$url" == *\?* ]] && echo '&' || echo '?')dl=1" ;;
+          esac
+          dir="$RUNNER_TEMP/art"
+          rm -rf "$dir"; mkdir -p "$dir"
+          curl -sSfL --retry 3 -o "$dir/art.zip" "$url" || { echo "::warning::Could not download MONOLOCO_ART_URL: keeping the built-in artwork."; exit 0; }
+          unzip -q -o "$dir/art.zip" -d "$dir/x" || { echo "::warning::MONOLOCO_ART_URL is not a .zip: keeping the built-in artwork."; exit 0; }
+          # Only the known image files are taken, wherever res/ sits in the archive.
+          res="$(find "$dir/x" -type d -name res | head -1)"
+          if [ -z "$res" ]; then
+            # A Dropbox folder link: the .zip holds the artwork .zip.
+            inner="$(find "$dir/x" -name '*.zip' | head -1)"
+            [ -n "$inner" ] && unzip -q -o "$inner" -d "$dir/y" && res="$(find "$dir/y" -type d -name res | head -1)"
+          fi
+          [ -n "$res" ] || { echo "::warning::No res/ folder in the artwork .zip."; exit 0; }
+          copied=0
+          for f in drawable-nodpi/launcher_backdrop.jpg drawable-nodpi/game1_logo.png drawable-nodpi/game2_logo.png \
+                   drawable-nodpi/game3_logo.png drawable-nodpi/launcher_logo.png; do
+            [ -f "$res/$f" ] && cp "$res/$f" "android/app/src/main/res/$f" && copied=$((copied+1))
+          done
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            for f in ic_launcher.png ic_launcher_background.png ic_launcher_foreground.png; do
+              [ -f "$res/mipmap-$d/$f" ] && cp "$res/mipmap-$d/$f" "android/app/src/main/res/mipmap-$d/$f" && copied=$((copied+1))
+            done
+          done
+          rm -rf "$dir"
+          echo "::notice::Private artwork: $copied files replaced for this build."
+
       - name: Signing key
         env:
           MONOLOCO_KEYSTORE_B64: ${{ secrets.MONOLOCO_KEYSTORE_B64 }}

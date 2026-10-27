@@ -36,6 +36,12 @@ y RG477M.
 - **Controles táctiles** con editor (mover, cambiar tamaño, cuadrícula y preajustes en XML).
   Se ocultan solos si hay un mando conectado.
 
+## Arte privado (opcional)
+
+El secreto `MONOLOCO_ART_URL` (enlace privado a un .zip con una carpeta `res/`) sustituye en esa
+compilación los iconos, las insignias de los juegos y el fondo del lanzador por los tuyos. Ese arte
+no se guarda nunca en el repositorio; sin el secreto, la APK lleva el arte propio del proyecto.
+
 ## El código del juego
 
 Las recompilaciones convierten el código de la ROM en C **en tu propio equipo**. Ese código
