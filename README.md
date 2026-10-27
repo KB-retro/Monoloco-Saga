@@ -41,6 +41,8 @@ y RG477M.
 El secreto `MONOLOCO_ART_URL` (enlace privado a un .zip con una carpeta `res/`) sustituye en esa
 compilación los iconos, las insignias de los juegos y el fondo del lanzador por los tuyos. Ese arte
 no se guarda nunca en el repositorio; sin el secreto, la APK lleva el arte propio del proyecto.
+Un `titles.txt` junto a `res/` (líneas `game1_title=…`, `game1_subtitle=…`) cambia también los
+nombres de los juegos en el lanzador; un subtítulo vacío se oculta.
 
 ## El código del juego
 

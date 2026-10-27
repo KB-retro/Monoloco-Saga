@@ -176,6 +176,8 @@ public final class LauncherActivity extends Activity {
             title.setTypeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.BOLD_ITALIC));
             TextView subtitle = new TextView(this);
             subtitle.setText(Games.SUBTITLES[g - 1]);
+            // A private build may give a game no subtitle (see MONOLOCO_ART_URL).
+            if (subtitle.getText().length() == 0) subtitle.setVisibility(View.GONE);
             subtitle.setTextColor(0xFFA9C8B8);
             subtitle.setTextSize(12);
             TextView state = new TextView(this);

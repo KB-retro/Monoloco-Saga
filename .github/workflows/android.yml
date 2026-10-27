@@ -135,6 +135,27 @@ jobs:
               [ -f "$res/mipmap-$d/$f" ] && cp "$res/mipmap-$d/$f" "android/app/src/main/res/mipmap-$d/$f" && copied=$((copied+1))
             done
           done
+          # titles.txt beside res/: "name=text" lines for the game titles and subtitles.
+          titles="$(dirname "$res")/titles.txt"
+          if [ -f "$titles" ]; then
+            python3 - "$titles" android/app/src/main/res/values/strings.xml android/app/src/main/res/values-en/strings.xml <<'PY'
+          import re, sys
+          from xml.sax.saxutils import escape
+          allowed = {f"game{n}_{k}" for n in (1, 2, 3) for k in ("title", "subtitle")}
+          pairs = {}
+          for line in open(sys.argv[1], encoding="utf-8-sig"):
+              if "=" in line:
+                  key, value = line.split("=", 1)
+                  if key.strip() in allowed:
+                      pairs[key.strip()] = escape(value.strip()).replace("'", "\\'").replace('"', '\\"')
+          for path in sys.argv[2:]:
+              text = open(path, encoding="utf-8").read()
+              for key, value in pairs.items():
+                  text = re.sub(r'(<string name="%s"[^>]*>)[^<]*(</string>)' % key, lambda m: m.group(1) + value + m.group(2), text)
+              open(path, "w", encoding="utf-8").write(text)
+          print(f"::notice::Private titles: {len(pairs)} replaced for this build.")
+          PY
+          fi
           rm -rf "$dir"
           echo "::notice::Private artwork: $copied files replaced for this build."
 
